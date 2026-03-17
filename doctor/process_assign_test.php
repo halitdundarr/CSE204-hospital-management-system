@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'doctor') {
@@ -10,6 +11,13 @@ $doctor_id = $_SESSION['user_id'];
 
 // Check POST data
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_POST['test_id'], $_POST['patient_id'])) {
+
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['manage_patient_feedback'] = "Invalid form token. Please try again.";
+        $_SESSION['manage_patient_feedback_type'] = "error";
+        header("Location: view_appointments.php");
+        exit;
+    }
 
     $appointment_id = filter_var($_POST['appointment_id'], FILTER_VALIDATE_INT);
     $test_id = filter_var($_POST['test_id'], FILTER_VALIDATE_INT);

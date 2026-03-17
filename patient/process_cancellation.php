@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check if user is logged in and is a patient
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
@@ -11,6 +12,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
 
 // Check if the form was submitted using POST and appointment ID is present
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id_to_cancel'])) {
+
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['cancellation_error'] = "Invalid form token. Please try again.";
+        header("Location: view_appointments.php");
+        exit;
+    }
 
     $appointment_id = intval($_POST['appointment_id_to_cancel']);
     $patient_id = $_SESSION['user_id'];

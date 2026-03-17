@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check if user is logged in and is a patient
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
@@ -11,6 +12,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
 
 // Check if the form was submitted using POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['booking_error'] = "Invalid form token. Please try again.";
+        header("Location: book_appointment.php");
+        exit;
+    }
 
     // Retrieve data from the form
     $patient_id = $_SESSION['user_id'];

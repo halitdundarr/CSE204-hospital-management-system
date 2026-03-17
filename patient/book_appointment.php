@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php'; // Veritabanı bağlantısı
+require_once '../includes/functions.php';
 
 // Check if user is logged in and is a patient
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
@@ -178,6 +179,7 @@ $conn->close();
                              }
                              ?>
                          </select>
+                            <?php echo csrf_input_field(); ?>
                            <?php if ($preselected_doctor_id && $selected_clinic_id != $preselected_clinic_id) echo "<small style='color:orange;'>Original doctor not in this clinic.</small>"; ?>
                     </div>
 

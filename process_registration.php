@@ -1,16 +1,24 @@
 <?php
 session_start();
 require_once 'includes/db_connect.php'; // Assuming db_connect is in includes folder relative to this script
+require_once 'includes/functions.php';
 
 // Check if the form was submitted using POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['register_feedback'] = "Invalid form token. Please submit the form again.";
+        $_SESSION['register_feedback_type'] = 'error';
+        header("Location: register.php");
+        exit;
+    }
 
     // --- Retrieve Data ---
     $patient_id_tc = trim($_POST['patient_id_tc']);
     $first_name = trim($_POST['first_name']);
     $last_name = trim($_POST['last_name']);
     $phone = trim($_POST['phone']);
-    $password = $_POST['password']; // *** Düz metin şifre ***
+    $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     $gender = trim($_POST['gender']);
     $dob = trim($_POST['dob']);
@@ -61,9 +69,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: register.php");
         exit;
     } else {
-        // *** ŞİFRE HASHLEME KODU KALDIRILDI ***
-        // $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        // if ($hashed_password === false) { ... }
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        if ($hashed_password === false) {
+            $_SESSION['register_feedback'] = "Registration failed while securing password.";
+            $_SESSION['register_feedback_type'] = "error";
+            header("Location: register.php");
+            exit;
+        }
 
         $insert_sql = "INSERT INTO `PATIENT` (
                             `Patient_ID`, `Patient_First_Name`, `Patient_Last_Name`,
@@ -73,7 +85,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $insert_stmt = $conn->prepare($insert_sql);
 
         if ($insert_stmt) {
-            // Bind parameters - using plain $password
             $insert_stmt->bind_param("sssssssss",
                                      $patient_id_tc,
                                      $first_name,
@@ -83,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                      $blood_type,
                                      $phone,
                                      $address,
-                                     $password // *** Düz metin şifre ***
+                                     $hashed_password
                                     );
 
             if ($insert_stmt->execute()) {

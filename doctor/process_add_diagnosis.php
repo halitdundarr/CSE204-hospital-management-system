@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check if user is logged in and is a doctor
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'doctor') {
@@ -12,6 +13,13 @@ $doctor_id = $_SESSION['user_id'];
 
 // Check if the form was submitted using POST and required fields are present
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_POST['diagnosis_id'], $_POST['patient_id'])) {
+
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['manage_patient_feedback'] = "Invalid form token. Please try again.";
+        $_SESSION['manage_patient_feedback_type'] = "error";
+        header("Location: view_appointments.php");
+        exit;
+    }
 
     $appointment_id = filter_var($_POST['appointment_id'], FILTER_VALIDATE_INT);
     $diagnosis_id = filter_var($_POST['diagnosis_id'], FILTER_VALIDATE_INT);

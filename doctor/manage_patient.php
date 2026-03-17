@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'doctor') {
@@ -196,6 +197,7 @@ $conn->close();
                      <div class="action-form">
                          <h4>Add New Diagnosis</h4>
                          <form action="process_add_diagnosis.php" method="POST">
+                             <?php echo csrf_input_field(); ?>
                              <input type="hidden" name="appointment_id" value="<?php echo $appointment_id; ?>">
                              <input type="hidden" name="patient_id" value="<?php echo $patient_id; ?>">
                              <div class="form-group">
@@ -230,6 +232,7 @@ $conn->close();
                      <div class="action-form">
                          <h4>Assign New Test</h4>
                           <form action="process_assign_test.php" method="POST">
+                                      <?php echo csrf_input_field(); ?>
                              <input type="hidden" name="appointment_id" value="<?php echo $appointment_id; ?>">
                              <input type="hidden" name="patient_id" value="<?php echo $patient_id; ?>">
                              <div class="form-group">
@@ -262,6 +265,7 @@ $conn->close();
                      <div class="action-form">
                          <h4>Add New Treatment</h4>
                           <form action="process_add_treatment.php" method="POST">
+                                      <?php echo csrf_input_field(); ?>
                              <input type="hidden" name="appointment_id" value="<?php echo $appointment_id; ?>">
                              <input type="hidden" name="patient_id" value="<?php echo $patient_id; ?>">
                              <div class="form-group">
@@ -304,6 +308,7 @@ $conn->close();
                      <div class="action-form">
                          <h4>Add Medicine to Prescription</h4>
                          <form action="process_add_prescription_medicine.php" method="POST">
+                             <?php echo csrf_input_field(); ?>
                              <input type="hidden" name="appointment_id" value="<?php echo $appointment_id; ?>">
                              <input type="hidden" name="patient_id" value="<?php echo $patient_id; ?>">
                              <?php if ($prescription_details): ?>

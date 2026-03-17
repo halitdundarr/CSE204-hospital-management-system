@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -12,6 +13,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 // Check POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['admin_feedback'] = "Invalid form token. Please try again.";
+        $_SESSION['admin_feedback_type'] = "error";
+        header("Location: add_patient.php");
+        exit;
+    }
+
     // Retrieve data
     $patient_id_tc = trim($_POST['tc_kimlik_no']);
     $first_name = trim($_POST['first_name']);
@@ -21,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $blood_type = trim($_POST['blood_type']);
     $phone = trim($_POST['phone']);
     $address = trim($_POST['address']);
-    $password = $_POST['password']; // *** Düz metin şifre ***
+    $password = $_POST['password'];
 
     // Validation
     $errors = [];
@@ -63,18 +71,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // *** ŞİFRE HASHLEME KODU KALDIRILDI ***
-    // $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    // if ($hashed_password === false) { ... } // Hata kontrolü de kaldırıldı
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    if ($hashed_password === false) {
+        $_SESSION['admin_feedback'] = "Failed to secure patient password.";
+        $_SESSION['admin_feedback_type'] = "error";
+        header("Location: add_patient.php");
+        exit;
+    }
 
-    // Prepare INSERT statement - Patient_ID ve düz metin şifre ile
     $insert_sql = "INSERT INTO `PATIENT` (`Patient_ID`, `Patient_First_Name`, `Patient_Last_Name`, `Patient_Gender`, `Patient_DOB`, `Patient_Blood_Type`, `Patient_Phone`, `Patient_Address`, `Patient_Password`)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $insert_stmt = $conn->prepare($insert_sql);
 
     if ($insert_stmt) {
-        // Bind parameters - Son parametre artık $hashed_password yerine $password
-        $insert_stmt->bind_param("sssssssss", // Tipler aynı kalabilir (hepsi string)
+        $insert_stmt->bind_param("sssssssss",
                                  $patient_id_tc,
                                  $first_name,
                                  $last_name,
@@ -83,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                  $blood_type,
                                  $phone,
                                  $address,
-                                 $password // *** Düz metin şifre bağlandı ***
+                     $hashed_password
                                 );
 
         if ($insert_stmt->execute()) {

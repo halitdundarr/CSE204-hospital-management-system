@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
@@ -151,6 +152,7 @@ $conn->close();
                                     <?php if ($is_future_scheduled): ?>
                                         <a href="edit_appointment.php?appointment_id=<?php echo $appt['Appointment_ID']; ?>" class="action-button edit">Edit</a>
                                         <form action="process_cancellation.php" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                            <?php echo csrf_input_field(); ?>
                                             <input type="hidden" name="appointment_id_to_cancel" value="<?php echo $appt['Appointment_ID']; ?>">
                                             <button type="submit" class="action-button cancel">Cancel</button>
                                         </form>

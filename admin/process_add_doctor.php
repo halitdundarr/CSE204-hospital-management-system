@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -13,6 +14,13 @@ $admin_id = $_SESSION['user_id'];
 // Check if the form was submitted using POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['admin_feedback'] = "Invalid form token. Please try again.";
+        $_SESSION['admin_feedback_type'] = "error";
+        header("Location: add_doctor.php");
+        exit;
+    }
+
     // Retrieve data
     $first_name = trim($_POST['first_name']);
     $last_name = trim($_POST['last_name']);
@@ -20,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
     $phone = trim($_POST['phone']);
     $clinic_id = filter_var($_POST['clinic_id'], FILTER_VALIDATE_INT);
-    $password = $_POST['password']; // Düz metin şifre
+    $password = $_POST['password'];
 
     // Validation
     $errors = [];
@@ -51,7 +59,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Şifre hashleme yok (kullanıcının isteği üzerine)
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    if ($hashed_password === false) {
+        $_SESSION['admin_feedback'] = "Failed to secure doctor password.";
+        $_SESSION['admin_feedback_type'] = "error";
+        header("Location: add_doctor.php");
+        exit;
+    }
 
     // Prepare INSERT statement
     $insert_sql = "INSERT INTO `DOCTOR` (`Doctor_First_Name`, `Doctor_Last_Name`, `Doctor_Gender`, `Doctor_Email`, `Doctor_Phone`, `Clinic_ID`, `Doctor_Password`, `Admin_ID`)
@@ -67,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                  $email,
                                  $phone,
                                  $clinic_id,
-                                 $password, // Düz metin şifre (string)
+                                 $hashed_password,
                                  $admin_id  // Session'dan gelen admin ID (integer)
                                 );
 

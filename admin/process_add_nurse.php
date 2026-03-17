@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -13,6 +14,13 @@ $admin_id = $_SESSION['user_id'];
 
 // Check if the form was submitted using POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['admin_feedback'] = "Invalid form token. Please try again.";
+        $_SESSION['admin_feedback_type'] = "error";
+        header("Location: add_nurse.php");
+        exit;
+    }
 
     // Retrieve and sanitize basic data
     $first_name = trim($_POST['first_name']);

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role - ADMIN access
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -94,6 +95,7 @@ unset($_SESSION['admin_edit_appointment_feedback_type']);
             <li><a href="find_patient_doctors.php">List Patient's Doctors</a></li>
             <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>
             <li><a href="manage_appointments.php">Manage Appointments</a></li>
+            <li><a href="reports.php">View Reports</a></li>
         </ul>
          <div class="logout-link">
              <a href="../logout.php">Logout</a>
@@ -125,6 +127,7 @@ unset($_SESSION['admin_edit_appointment_feedback_type']);
                  </div>
 
                  <form id="edit-appointment-form-admin" action="process_edit_appointment.php" method="POST">
+                     <?php echo csrf_input_field(); ?>
                      <input type="hidden" name="appointment_id" value="<?php echo htmlspecialchars($appointment['Appointment_ID']); ?>">
                      <input type="hidden" id="doctor_id_hidden_admin" name="doctor_id" value="<?php echo htmlspecialchars($appointment['Doctor_ID']); ?>">
 

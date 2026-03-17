@@ -1,10 +1,17 @@
 <?php
 session_start();
 require_once 'includes/db_connect.php'; // Veritabanı bağlantısı
+require_once 'includes/functions.php';
 
 // === Güvenlik Uyarısı: Gerçek uygulamada şifreleri hash'leyin! ===
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['login_error'] = "Invalid form token. Please try again.";
+        header("Location: index.php");
+        exit();
+    }
 
     $identifier = trim($_POST['identifier']);
     $password = trim($_POST['password']);
@@ -80,8 +87,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows == 1) {
         $user = $result->fetch_assoc();
 
-        // Şifre kontrolü (Düz metin - GÜVENSİZ!)
-        if ($password === $user[$password_col]) { // Use correct password column name
+        $stored_password = $user[$password_col];
+        $is_valid_password = false;
+
+        if (is_string($stored_password) && password_verify($password, $stored_password)) {
+            $is_valid_password = true;
+        } elseif ($password === $stored_password) {
+            // Backward compatibility for legacy plain-text records.
+            $is_valid_password = true;
+        }
+
+        if ($is_valid_password) {
+
+            // Prevent session fixation by issuing a fresh session id after login.
+            session_regenerate_id(true);
 
             // Session değişkenlerini ayarla
             $_SESSION['user_id'] = $user[$user_id_col];

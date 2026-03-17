@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'includes/functions.php';
 
 // *** YENİ: Kayıt başarı mesajını kontrol et ***
 $register_success_message = null;
@@ -189,6 +190,7 @@ if (isset($_SESSION['login_success_message'])) {
         ?>
 
         <form action="login_process.php" method="post">
+            <?php echo csrf_input_field(); ?>
             <div>
                 <label for="identifier">User ID / Email:</label>
                 <input type="text" id="identifier" name="identifier" placeholder="Enter Patient ID or Doctor/Admin Email" required>

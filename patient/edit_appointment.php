@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role - PATIENT access
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
@@ -124,6 +125,7 @@ unset($_SESSION['patient_edit_appointment_feedback_type']);
                  </div>
 
                  <form id="edit-appointment-form" action="process_edit_appointment.php" method="POST">
+                     <?php echo csrf_input_field(); ?>
                      <input type="hidden" name="appointment_id" value="<?php echo htmlspecialchars($appointment['Appointment_ID']); ?>">
                      <input type="hidden" id="doctor_id_hidden" name="doctor_id" value="<?php echo htmlspecialchars($appointment['Doctor_ID']); ?>"> <div class="form-group">
                          <label for="appointment_date">New Date:</label>

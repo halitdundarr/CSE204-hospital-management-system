@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -69,6 +70,7 @@ unset($_SESSION['admin_feedback_type']);
             <li><a href="find_patient_doctors.php">List Patient's Doctors</a></li>
             <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>
             <li><a href="manage_appointments.php">Manage Appointments</a></li>
+            <li><a href="reports.php">View Reports</a></li>
         </ul>
          <div class="logout-link">
              <a href="../logout.php">Logout</a>
@@ -90,6 +92,7 @@ unset($_SESSION['admin_feedback_type']);
             <?php endif; ?>
 
             <form action="process_add_patient.php" method="POST">
+                  <?php echo csrf_input_field(); ?>
                  <div class="form-group">
                     <label for="tc_kimlik_no">TC Kimlik No (Patient ID):</label>
                     <input type="number" id="tc_kimlik_no" name="tc_kimlik_no" required pattern="\d{11}" title="Please enter exactly 11 digits" maxlength="11" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -71,6 +72,7 @@ $conn->close();
             <li><a href="find_patient_doctors.php">List Patient's Doctors</a></li>
             <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>
             <li><a href="manage_appointments.php">Manage Appointments</a></li>
+            <li><a href="reports.php">View Reports</a></li>
         </ul>
          <div class="logout-link">
              <a href="../logout.php">Logout</a>
@@ -134,6 +136,7 @@ $conn->close();
                                      <?php endif; ?>
                                      <?php // Delete butonu artık her zaman görünecek ?>
                                      <form action="process_delete_appointment.php" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to PERMANENTLY DELETE this appointment (ID: <?php echo $appt['Appointment_ID']; ?>)? This cannot be undone.');">
+                                         <?php echo csrf_input_field(); ?>
                                          <input type="hidden" name="appointment_id_to_delete" value="<?php echo $appt['Appointment_ID']; ?>">
                                          <button type="submit" class="action-button delete">Delete</button>
                                      </form>

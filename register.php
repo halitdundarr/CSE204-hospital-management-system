@@ -1,11 +1,14 @@
 <?php
 session_start();
+require_once 'includes/functions.php';
 
 // Check for feedback messages
-$feedback_message = isset($_SESSION['register_error']) ? $_SESSION['register_error'] : null;
-$feedback_type = 'error';
+$feedback_message = $_SESSION['register_feedback'] ?? ($_SESSION['register_error'] ?? null);
+$feedback_type = $_SESSION['register_feedback_type'] ?? 'error';
 $form_data = isset($_SESSION['register_form_data']) ? $_SESSION['register_form_data'] : [];
 
+unset($_SESSION['register_feedback']);
+unset($_SESSION['register_feedback_type']);
 unset($_SESSION['register_error']);
 unset($_SESSION['register_form_data']);
 
@@ -150,6 +153,16 @@ unset($_SESSION['register_form_data']);
             font-size: 0.9em;
         }
 
+        .success-message {
+            color: #0f5132;
+            background: #e9f8f0;
+            border: 1px solid #c8ead9;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
         .login-link {
             text-align: center;
             margin-top: 16px;
@@ -183,7 +196,7 @@ unset($_SESSION['register_form_data']);
         <p class="helper-text">Create your account to manage appointments and medical records.</p>
 
         <?php if ($feedback_message): ?>
-            <div class="error-message">
+            <div class="<?php echo $feedback_type === 'success' ? 'success-message' : 'error-message'; ?>">
                 <?php
                     if (is_array($feedback_message)) {
                         echo implode("<br>", array_map('htmlspecialchars', $feedback_message));
@@ -195,6 +208,7 @@ unset($_SESSION['register_form_data']);
         <?php endif; ?>
 
         <form action="process_registration.php" method="post" id="registration-form">
+            <?php echo csrf_input_field(); ?>
             <div class="form-group">
                 <label for="tc_kimlik_no">TC Kimlik No (Patient ID):</label>
                 <input type="number" id="tc_kimlik_no" name="patient_id_tc" required pattern="\d{11}" title="Please enter exactly 11 digits" maxlength="11" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" value="<?php echo htmlspecialchars($form_data['patient_id_tc'] ?? ''); ?>">
