@@ -51,7 +51,12 @@ ln -sfn /absolute/path/to/hospital-management-system-demo /Applications/AMPPS/ww
 
 3. Create database `Hospital_3NF` in phpMyAdmin.
 4. Import `database_setup.sql` into `Hospital_3NF`.
-5. Verify DB config in `includes/db_connect.php`.
+5. Create local env file from template and set DB credentials:
+
+```bash
+cp .env.example .env
+```
+
 6. Open:
 
 ```text
@@ -61,6 +66,7 @@ http://localhost/hospital-management-system-demo/
 ## Database Notes
 
 - The application expects database name: `Hospital_3NF`
+- DB connection values are read from `.env`
 - The SQL file creates all required tables and constraints
 - Seed data includes sample users for each role
 
