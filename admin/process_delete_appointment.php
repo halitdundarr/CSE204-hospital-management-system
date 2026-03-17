@@ -53,6 +53,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id_to_dele
             $stmt->bind_param("i", $appointment_id);
             if ($stmt->execute()) {
                 if ($stmt->affected_rows > 0) {
+                    audit_log_action(
+                        $conn,
+                        'admin',
+                        (int)$_SESSION['user_id'],
+                        'ADMIN_DELETE_APPOINTMENT',
+                        'APPOINTMENT',
+                        $appointment_id,
+                        [
+                            'delete_mode' => 'hard_delete'
+                        ]
+                    );
                     $_SESSION['admin_manage_appointment_feedback'] = "Appointment ID: $appointment_id deleted successfully.";
                     $_SESSION['admin_manage_appointment_feedback_type'] = "success";
                 } else {

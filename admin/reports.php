@@ -69,6 +69,7 @@ $conn->close();
             <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>
             <li><a href="manage_appointments.php">Manage Appointments</a></li>
             <li><a href="reports.php">View Reports</a></li>
+            <li><a href="audit_logs.php">View Audit Logs</a></li>
         </ul>
         <div class="logout-link">
             <a href="../logout.php">Logout</a>

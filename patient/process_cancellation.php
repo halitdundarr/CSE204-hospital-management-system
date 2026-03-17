@@ -57,6 +57,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id_to_canc
                 $update_stmt->bind_param("si", $cancelled_status, $appointment_id);
                 if ($update_stmt->execute()) {
                     if ($update_stmt->affected_rows > 0) {
+                        audit_log_action(
+                            $conn,
+                            'patient',
+                            $patient_id,
+                            'CANCEL_APPOINTMENT',
+                            'APPOINTMENT',
+                            $appointment_id,
+                            [
+                                'new_status' => $cancelled_status
+                            ]
+                        );
                         $_SESSION['cancellation_success'] = "Appointment successfully cancelled.";
                     } else {
                         $_SESSION['cancellation_error'] = "Appointment status could not be updated or was already updated.";

@@ -73,6 +73,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                           );
 
         if ($stmt->execute()) {
+            $new_appointment_id = $conn->insert_id;
+            audit_log_action(
+                $conn,
+                'patient',
+                $patient_id,
+                'BOOK_APPOINTMENT',
+                'APPOINTMENT',
+                $new_appointment_id,
+                [
+                    'doctor_id' => $doctor_id,
+                    'appointment_date' => $appointment_date,
+                    'appointment_time' => $appointment_time,
+                    'follow_up_for_id' => $follow_up_param
+                ]
+            );
             $_SESSION['booking_success'] = "Appointment booked successfully for " . htmlspecialchars($appointment_date) . " at " . htmlspecialchars(substr($appointment_time, 0, 5)) . ".";
             header("Location: dashboard.php");
             exit;

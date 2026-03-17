@@ -108,6 +108,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
         $update_stmt->bind_param("ssii", $new_date, $new_time_db, $appointment_id, $patient_id);
         if ($update_stmt->execute()) {
             if ($update_stmt->affected_rows > 0) {
+                 audit_log_action(
+                    $conn,
+                    'patient',
+                    $patient_id,
+                    'RESCHEDULE_APPOINTMENT',
+                    'APPOINTMENT',
+                    $appointment_id,
+                    [
+                        'doctor_id' => $doctor_id,
+                        'new_date' => $new_date,
+                        'new_time' => $new_time_db
+                    ]
+                 );
                  $_SESSION['patient_edit_appointment_feedback'] = "Appointment updated successfully."; // Feedback for list page
                  $_SESSION['patient_edit_appointment_feedback_type'] = "success";
                  header("Location: view_appointments.php"); // Redirect to list on success
