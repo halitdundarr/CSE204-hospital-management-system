@@ -61,6 +61,9 @@ $all_tests = [];
 $all_treatments = []; // *** YENİ: Tüm tedavileri tutacak dizi ***
 $all_medicines = []; // *** YENİ: Tüm ilaçları tutacak dizi ***
 
+// Billing (Bill tablosu)
+$existing_bill = null;
+
 if ($appointment_details) { // Only fetch if appointment is valid
     // Fetch Existing Diagnoses
     $sql_diag_exist = "SELECT d.`Diagnosis_Name` FROM `Appointment_Diagnosis` ad JOIN `DIAGNOSIS` d ON ad.`Diagnosis_ID` = d.`Diagnosis_ID` WHERE ad.`Appointment_ID` = ?";
@@ -105,6 +108,22 @@ if ($appointment_details) { // Only fetch if appointment is valid
     $sql_all_med = "SELECT `Medicine_ID`, `Medicine_Name` FROM `MEDICINE` ORDER BY `Medicine_Name` ASC";
     $res_all_med = $conn->query($sql_all_med);
     if($res_all_med) { while($r = $res_all_med->fetch_assoc()){ $all_medicines[] = $r; } }
+
+    // Fetch Existing Bill (if any)
+    $sql_bill_exist = "SELECT `Bill_ID`, `Total_Amount`, `Issue_Date`, `Status`
+                        FROM `Bill`
+                        WHERE `Appointment_ID` = ?
+                        LIMIT 1";
+    $stmt_bill_exist = $conn->prepare($sql_bill_exist);
+    if ($stmt_bill_exist) {
+        $stmt_bill_exist->bind_param("i", $appointment_id);
+        $stmt_bill_exist->execute();
+        $res_bill_exist = $stmt_bill_exist->get_result();
+        if ($res_bill_exist && $res_bill_exist->num_rows === 1) {
+            $existing_bill = $res_bill_exist->fetch_assoc();
+        }
+        $stmt_bill_exist->close();
+    }
 
 } // End if ($appointment_details)
 
@@ -288,6 +307,51 @@ $conn->close();
                          </form>
                      </div>
                  </div>
+
+                <div id="billing" class="section">
+                    <h3>Bill (Fatura)</h3>
+
+                    <?php if ($existing_bill): ?>
+                        <p><strong>Existing Bill ID:</strong> <?php echo htmlspecialchars($existing_bill['Bill_ID']); ?></p>
+                        <p><strong>Issue Date:</strong> <?php echo htmlspecialchars($existing_bill['Issue_Date'] ? date("d-m-Y", strtotime($existing_bill['Issue_Date'])) : 'N/A'); ?></p>
+                        <p><strong>Current Total:</strong> <?php echo htmlspecialchars($existing_bill['Total_Amount']); ?></p>
+                        <p><strong>Status:</strong> <?php echo htmlspecialchars($existing_bill['Status']); ?></p>
+                    <?php else: ?>
+                        <p class="no-data">No bill created for this appointment yet.</p>
+                    <?php endif; ?>
+
+                    <div class="action-form">
+                        <h4><?php echo $existing_bill ? 'Update Bill' : 'Create Bill'; ?></h4>
+                        <form action="process_add_bill.php" method="POST">
+                            <?php echo csrf_input_field(); ?>
+                            <input type="hidden" name="appointment_id" value="<?php echo $appointment_id; ?>">
+                            <input type="hidden" name="patient_id" value="<?php echo $patient_id; ?>">
+
+                            <div class="form-group">
+                                <label for="total_amount">Total Amount (₺):</label>
+                                <input
+                                    type="number"
+                                    id="total_amount"
+                                    name="total_amount"
+                                    step="0.01"
+                                    min="0"
+                                    required
+                                    value="<?php echo htmlspecialchars($existing_bill['Total_Amount'] ?? ''); ?>"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="status">Status:</label>
+                                <select id="status" name="status" required>
+                                    <option value="Unpaid" <?php echo (($existing_bill['Status'] ?? 'Unpaid') === 'Unpaid') ? 'selected' : ''; ?>>Unpaid</option>
+                                    <option value="Paid" <?php echo (($existing_bill['Status'] ?? 'Unpaid') === 'Paid') ? 'selected' : ''; ?>>Paid</option>
+                                </select>
+                            </div>
+
+                            <button type="submit"><?php echo $existing_bill ? 'Update Bill' : 'Create Bill'; ?></button>
+                        </form>
+                    </div>
+                </div>
 
                  <div id="prescription" class="section">
                      <h3>Prescription</h3>

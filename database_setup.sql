@@ -462,6 +462,31 @@ INSERT INTO `Test` (`Test_ID`, `Test_Name`) VALUES
 (9, 'Blood Pressure Measurement'),
 (10, 'EEG');
 
+-- --------------------------------------------------------
+--
+-- Table structure for table `Bill`
+--
+
+CREATE TABLE `Bill` (
+  `Bill_ID` int(11) NOT NULL,
+  `Patient_ID` bigint(20) NOT NULL,
+  `Appointment_ID` int(11) NOT NULL,
+  `Total_Amount` decimal(10,2) NOT NULL,
+  `Issue_Date` date NOT NULL,
+  `Status` enum('Paid','Unpaid') NOT NULL DEFAULT 'Unpaid'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Bill`
+--
+
+INSERT INTO `Bill` (`Bill_ID`, `Patient_ID`, `Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`) VALUES
+(1, 43543543565, 1, 100.00, '2024-03-02', 'Unpaid'),
+(2, 43543543565, 2, 250.50, '2024-05-03', 'Paid'),
+(3, 23423423477, 3, 75.25, '2024-02-12', 'Unpaid');
+
+-- --------------------------------------------------------
+
 --
 -- Indexes for dumped tables
 --
@@ -573,6 +598,14 @@ ALTER TABLE `Test`
   ADD PRIMARY KEY (`Test_ID`);
 
 --
+-- Indexes for table `Bill`
+--
+ALTER TABLE `Bill`
+  ADD PRIMARY KEY (`Bill_ID`),
+  ADD KEY `Patient_ID` (`Patient_ID`),
+  ADD UNIQUE KEY `uniq_bill_appointment` (`Appointment_ID`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -637,6 +670,12 @@ ALTER TABLE `Test`
   MODIFY `Test_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
+-- AUTO_INCREMENT for table `Bill`
+--
+ALTER TABLE `Bill`
+  MODIFY `Bill_ID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- Constraints for dumped tables
 --
 
@@ -696,6 +735,13 @@ ALTER TABLE `Prescription`
 ALTER TABLE `Prescription_medicine`
   ADD CONSTRAINT `prescription_medicine_ibfk_1` FOREIGN KEY (`Prescription_ID`) REFERENCES `Prescription` (`Prescription_ID`) ON DELETE CASCADE,
   ADD CONSTRAINT `prescription_medicine_ibfk_2` FOREIGN KEY (`Medicine_ID`) REFERENCES `Medicine` (`Medicine_ID`);
+
+--
+-- Constraints for table `Bill`
+--
+ALTER TABLE `Bill`
+  ADD CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`Patient_ID`) REFERENCES `Patient` (`Patient_ID`),
+  ADD CONSTRAINT `bill_ibfk_2` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

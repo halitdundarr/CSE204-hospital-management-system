@@ -28,6 +28,7 @@ $user_name = htmlspecialchars($_SESSION['user_name']);
             <li><a href="manage_appointments.php">Manage Appointments</a></li>
             <li><a href="reports.php">View Reports</a></li>
             <li><a href="audit_logs.php">View Audit Logs</a></li>
+            <li><a href="view_bills.php">View Bills</a></li>
             </ul>
          <div class="logout-link">
              <a href="../logout.php">Logout</a>

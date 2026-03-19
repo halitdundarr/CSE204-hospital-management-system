@@ -46,6 +46,7 @@ if (isset($_SESSION['booking_success'])) {
             <li><a href="view_prescriptions.php">View Prescriptions</a></li>
             <li><a href="view_diagnoses.php">View Diagnoses</a></li>
             <li><a href="view_tests.php">View Tests & Results</a></li>
+            <li><a href="view_bills.php">View Bills</a></li>
         </ul>
         <div class="logout-link">
              <a href="../logout.php">Logout</a>
