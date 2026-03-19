@@ -97,12 +97,23 @@ if ($appointment_details) { // Only fetch if appointment is valid
     $res_all_treat = $conn->query($sql_all_treat);
     if($res_all_treat) { while($r = $res_all_treat->fetch_assoc()){ $all_treatments[] = $r; } }
 
-    // Fetch Existing Prescription Details
-     $sql_presc = "SELECT p.`Prescription_ID`, p.`Prescription_Date`, m.`Medicine_Name`, pm.`Dosage` FROM `PRESCRIPTION` p JOIN `Prescription_Medicine` pm ON p.`Prescription_ID` = pm.`Prescription_ID` JOIN `MEDICINE` m ON pm.`Medicine_ID` = m.`Medicine_ID` WHERE p.`Appointment_ID` = ? ORDER BY m.`Medicine_Name`";
+    // Fetch Existing Medicines for this appointment (Appointment_Medicine replaces Prescription tables)
+     $sql_presc = "SELECT am.`Dosage`, m.`Medicine_Name` FROM `Appointment_Medicine` am JOIN `Medicine` m ON am.`Medicine_ID` = m.`Medicine_ID` WHERE am.`Appointment_ID` = ? ORDER BY m.`Medicine_Name`";
      $stmt_presc = $conn->prepare($sql_presc);
-     if($stmt_presc){ $stmt_presc->bind_param("i", $appointment_id); $stmt_presc->execute(); $res_presc = $stmt_presc->get_result();
-         if($res_presc->num_rows > 0) { while($r = $res_presc->fetch_assoc()){ if(!$prescription_details) { $prescription_details = ['Prescription_Date' => $r['Prescription_Date'], 'Prescription_ID' => $r['Prescription_ID']]; } $existing_prescription_medicines[] = ['Medicine_Name' => $r['Medicine_Name'], 'Dosage' => $r['Dosage']]; } }
-     $stmt_presc->close();}
+     if($stmt_presc){ 
+        $stmt_presc->bind_param("i", $appointment_id); 
+        $stmt_presc->execute(); 
+        $res_presc = $stmt_presc->get_result();
+        if($res_presc && $res_presc->num_rows > 0) { 
+            while($r = $res_presc->fetch_assoc()){ 
+                if(!$prescription_details) { 
+                    $prescription_details = ['Prescription_Date' => $appointment_details['Appointment_Date'], 'Prescription_ID' => $appointment_id]; 
+                } 
+                $existing_prescription_medicines[] = ['Medicine_Name' => $r['Medicine_Name'], 'Dosage' => $r['Dosage']]; 
+            }
+        }
+        $stmt_presc->close(); 
+     }
 
     // *** YENİ: Fetch All Medicines for dropdown ***
     $sql_all_med = "SELECT `Medicine_ID`, `Medicine_Name` FROM `MEDICINE` ORDER BY `Medicine_Name` ASC";

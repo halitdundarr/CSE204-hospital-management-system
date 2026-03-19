@@ -374,50 +374,20 @@ INSERT INTO `Patient` (`Patient_ID`, `Patient_First_Name`, `Patient_Last_Name`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Prescription`
+-- Table structure for table `Appointment_Medicine`
 --
 
-CREATE TABLE `Prescription` (
-  `Prescription_ID` int(11) NOT NULL,
+CREATE TABLE `Appointment_Medicine` (
   `Appointment_ID` int(11) NOT NULL,
-  `Prescription_Date` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `Prescription`
---
-
-INSERT INTO `Prescription` (`Prescription_ID`, `Appointment_ID`, `Prescription_Date`) VALUES
-(1, 1, '2024-03-02'),
-(2, 2, '2024-05-03'),
-(3, 3, '2024-02-12'),
-(4, 4, '2024-05-03'),
-(5, 5, '2024-04-17'),
-(6, 6, '2024-01-26'),
-(7, 9, '2024-03-02'),
-(8, 10, '2024-06-17'),
-(9, 11, '2024-05-04'),
-(10, 12, '2024-04-20'),
-(11, 13, '2024-12-22'),
-(12, 14, '2024-05-03');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `Prescription_medicine`
---
-
-CREATE TABLE `Prescription_medicine` (
-  `Prescription_ID` int(11) NOT NULL,
   `Medicine_ID` int(11) NOT NULL,
   `Dosage` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Prescription_medicine`
+-- Dumping data for table `Appointment_Medicine`
 --
 
-INSERT INTO `Prescription_medicine` (`Prescription_ID`, `Medicine_ID`, `Dosage`) VALUES
+INSERT INTO `Appointment_Medicine` (`Appointment_ID`, `Medicine_ID`, `Dosage`) VALUES
 (1, 1, '2x1'),
 (1, 2, '3x1'),
 (2, 3, '1x1'),
@@ -426,13 +396,13 @@ INSERT INTO `Prescription_medicine` (`Prescription_ID`, `Medicine_ID`, `Dosage`)
 (4, 6, '1x2'),
 (5, 7, '1x1'),
 (6, 8, '1x1'),
-(7, 9, '1x1'),
-(8, 10, '1x2'),
-(9, 11, '1x1'),
-(10, 8, '1x1'),
-(11, 12, '1x1'),
-(11, 13, '1x1'),
-(12, 14, '1x2');
+(9, 9, '1x1'),
+(10, 10, '1x2'),
+(11, 11, '1x1'),
+(12, 8, '1x1'),
+(13, 12, '1x1'),
+(13, 13, '1x1'),
+(14, 14, '1x2');
 
 -- --------------------------------------------------------
 
@@ -578,17 +548,11 @@ ALTER TABLE `Patient`
   ADD PRIMARY KEY (`Patient_ID`);
 
 --
--- Indexes for table `Prescription`
 --
-ALTER TABLE `Prescription`
-  ADD PRIMARY KEY (`Prescription_ID`),
-  ADD KEY `Appointment_ID` (`Appointment_ID`);
-
+-- Indexes for table `Appointment_Medicine`
 --
--- Indexes for table `Prescription_medicine`
---
-ALTER TABLE `Prescription_medicine`
-  ADD PRIMARY KEY (`Prescription_ID`,`Medicine_ID`),
+ALTER TABLE `Appointment_Medicine`
+  ADD PRIMARY KEY (`Appointment_ID`,`Medicine_ID`),
   ADD KEY `Medicine_ID` (`Medicine_ID`);
 
 --
@@ -658,12 +622,6 @@ ALTER TABLE `Nurse`
   MODIFY `Nurse_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `Prescription`
---
-ALTER TABLE `Prescription`
-  MODIFY `Prescription_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
-
---
 -- AUTO_INCREMENT for table `Test`
 --
 ALTER TABLE `Test`
@@ -724,17 +682,11 @@ ALTER TABLE `Nurse`
   ADD CONSTRAINT `nurse_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
 
 --
--- Constraints for table `Prescription`
+-- Constraints for table `Appointment_Medicine`
 --
-ALTER TABLE `Prescription`
-  ADD CONSTRAINT `prescription_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE;
-
---
--- Constraints for table `Prescription_medicine`
---
-ALTER TABLE `Prescription_medicine`
-  ADD CONSTRAINT `prescription_medicine_ibfk_1` FOREIGN KEY (`Prescription_ID`) REFERENCES `Prescription` (`Prescription_ID`) ON DELETE CASCADE,
-  ADD CONSTRAINT `prescription_medicine_ibfk_2` FOREIGN KEY (`Medicine_ID`) REFERENCES `Medicine` (`Medicine_ID`);
+ALTER TABLE `Appointment_Medicine`
+  ADD CONSTRAINT `appointment_medicine_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `appointment_medicine_ibfk_2` FOREIGN KEY (`Medicine_ID`) REFERENCES `Medicine` (`Medicine_ID`);
 
 --
 -- Constraints for table `Bill`
