@@ -1,0 +1,30 @@
+services:
+  web:
+    build: .
+    container_name: hms_web
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: mysql
+      DB_NAME: Hospital_3NF
+
+  db:
+    image: mariadb:10.6
+    container_name: hms_db
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: Hospital_3NF
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database_setup.sql:/docker-entrypoint-initdb.d/01_database_setup.sql:ro
+      - ./mariadb.cnf:/etc/mysql/conf.d/99-lowercase.cnf:ro
+
+volumes:
+  db_data:
+

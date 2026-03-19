@@ -644,9 +644,9 @@ ALTER TABLE `Test`
 -- Constraints for table `Appointment`
 --
 ALTER TABLE `Appointment`
-  ADD CONSTRAINT `appointment_ibfk_1` FOREIGN KEY (`Patient_ID`) REFERENCES `PATIENT` (`Patient_ID`),
-  ADD CONSTRAINT `appointment_ibfk_2` FOREIGN KEY (`Doctor_ID`) REFERENCES `DOCTOR` (`Doctor_ID`),
-  ADD CONSTRAINT `appointment_ibfk_3` FOREIGN KEY (`Nurse_ID`) REFERENCES `NURSE` (`Nurse_ID`),
+  ADD CONSTRAINT `appointment_ibfk_1` FOREIGN KEY (`Patient_ID`) REFERENCES `Patient` (`Patient_ID`),
+  ADD CONSTRAINT `appointment_ibfk_2` FOREIGN KEY (`Doctor_ID`) REFERENCES `Doctor` (`Doctor_ID`),
+  ADD CONSTRAINT `appointment_ibfk_3` FOREIGN KEY (`Nurse_ID`) REFERENCES `Nurse` (`Nurse_ID`),
   ADD CONSTRAINT `appointment_ibfk_4` FOREIGN KEY (`Follow_Up_Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE SET NULL;
 
 --
@@ -654,35 +654,35 @@ ALTER TABLE `Appointment`
 --
 ALTER TABLE `Appointment_Diagnosis`
   ADD CONSTRAINT `appointment_diagnosis_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE,
-  ADD CONSTRAINT `appointment_diagnosis_ibfk_2` FOREIGN KEY (`Diagnosis_ID`) REFERENCES `DIAGNOSIS` (`Diagnosis_ID`);
+  ADD CONSTRAINT `appointment_diagnosis_ibfk_2` FOREIGN KEY (`Diagnosis_ID`) REFERENCES `Diagnosis` (`Diagnosis_ID`);
 
 --
 -- Constraints for table `Appointment_Test`
 --
 ALTER TABLE `Appointment_Test`
   ADD CONSTRAINT `appointment_test_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE,
-  ADD CONSTRAINT `appointment_test_ibfk_2` FOREIGN KEY (`Test_ID`) REFERENCES `TEST` (`Test_ID`);
+  ADD CONSTRAINT `appointment_test_ibfk_2` FOREIGN KEY (`Test_ID`) REFERENCES `Test` (`Test_ID`);
 
 --
 -- Constraints for table `Appointment_Treatment`
 --
 ALTER TABLE `Appointment_Treatment`
   ADD CONSTRAINT `appointment_treatment_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE,
-  ADD CONSTRAINT `appointment_treatment_ibfk_2` FOREIGN KEY (`Medical_Treatment_ID`) REFERENCES `MEDICAL_TREATMENT` (`Medical_Treatment_ID`);
+  ADD CONSTRAINT `appointment_treatment_ibfk_2` FOREIGN KEY (`Medical_Treatment_ID`) REFERENCES `Medical_Treatment` (`Medical_Treatment_ID`);
 
 --
 -- Constraints for table `Doctor`
 --
 ALTER TABLE `Doctor`
-  ADD CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `CLINIC` (`Clinic_ID`),
-  ADD CONSTRAINT `doctor_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `ADMIN` (`Admin_ID`);
+  ADD CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`),
+  ADD CONSTRAINT `doctor_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
 
 --
 -- Constraints for table `Nurse`
 --
 ALTER TABLE `Nurse`
-  ADD CONSTRAINT `nurse_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `CLINIC` (`Clinic_ID`),
-  ADD CONSTRAINT `nurse_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `ADMIN` (`Admin_ID`);
+  ADD CONSTRAINT `nurse_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`),
+  ADD CONSTRAINT `nurse_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
 
 --
 -- Constraints for table `Prescription`
@@ -695,7 +695,7 @@ ALTER TABLE `Prescription`
 --
 ALTER TABLE `Prescription_medicine`
   ADD CONSTRAINT `prescription_medicine_ibfk_1` FOREIGN KEY (`Prescription_ID`) REFERENCES `Prescription` (`Prescription_ID`) ON DELETE CASCADE,
-  ADD CONSTRAINT `prescription_medicine_ibfk_2` FOREIGN KEY (`Medicine_ID`) REFERENCES `MEDICINE` (`Medicine_ID`);
+  ADD CONSTRAINT `prescription_medicine_ibfk_2` FOREIGN KEY (`Medicine_ID`) REFERENCES `Medicine` (`Medicine_ID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
