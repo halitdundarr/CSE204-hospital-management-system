@@ -16,19 +16,21 @@ $prescriptions = [];
 $fetch_error = null;
 
 $sql = "SELECT
-            am.`Appointment_ID` AS `Prescription_ID`,
+            atr.`Appointment_ID` AS `Prescription_ID`,
             a.`Appointment_Date` AS `Prescription_Date`,
-            am.`Dosage`,
-            m.`Medicine_Name`,
+            atr.`Dosage`,
+            mt.`Medication_Name` AS `Medicine_Name`,
             a.`Appointment_Date` AS `Appointment_Date`,
             d.`Doctor_First_Name`,
             d.`Doctor_Last_Name`
-        FROM `Appointment_Medicine` am
-        JOIN `Appointment` a ON am.`Appointment_ID` = a.`Appointment_ID`
-        JOIN `Medicine` m ON am.`Medicine_ID` = m.`Medicine_ID`
+        FROM `Appointment_Treatment` atr
+        JOIN `Appointment` a ON atr.`Appointment_ID` = a.`Appointment_ID`
+        JOIN `Medical_Treatment` mt ON atr.`Medical_Treatment_ID` = mt.`Medical_Treatment_ID`
         JOIN `Doctor` d ON a.`Doctor_ID` = d.`Doctor_ID`
         WHERE a.`Patient_ID` = ?
-        ORDER BY a.`Appointment_Date` DESC, am.`Appointment_ID` DESC, m.`Medicine_Name` ASC";
+          AND mt.`Treatment_Type` = 'Medication'
+          AND mt.`Medication_Name` IS NOT NULL
+        ORDER BY a.`Appointment_Date` DESC, atr.`Appointment_ID` DESC, mt.`Medication_Name` ASC";
 
 $stmt = $conn->prepare($sql);
 

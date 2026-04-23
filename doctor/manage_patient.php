@@ -54,12 +54,12 @@ $existing_diagnoses = []; // Names only
 $existing_tests = []; // Array of {Test_Name, Test_Result}
 $existing_test_names = []; // Names only for dropdown filter
 $existing_treatments = []; // Names only
-$existing_prescription_medicines = []; // Array of {Medicine_Name, Dosage}
+$existing_prescription_medicines = []; // Array of {Medication_Name, Dosage}
 $prescription_details = null;
 $all_diagnoses = [];
 $all_tests = [];
 $all_treatments = []; // *** YENİ: Tüm tedavileri tutacak dizi ***
-$all_medicines = []; // *** YENİ: Tüm ilaçları tutacak dizi ***
+$all_medication_treatments = []; // Medication-type treatments for prescription
 
 // Billing (Bill tablosu)
 $existing_bill = null;
@@ -93,12 +93,22 @@ if ($appointment_details) { // Only fetch if appointment is valid
      if($stmt_treat_exist){ $stmt_treat_exist->bind_param("i", $appointment_id); $stmt_treat_exist->execute(); $res_treat_exist = $stmt_treat_exist->get_result(); while($r = $res_treat_exist->fetch_assoc()){ $existing_treatments[] = $r['Medical_Treatment'];} $stmt_treat_exist->close();}
 
     // *** YENİ: Fetch All Treatments for dropdown ***
-    $sql_all_treat = "SELECT `Medical_Treatment_ID`, `Medical_Treatment` FROM `MEDICAL_TREATMENT` WHERE Medical_Treatment_ID != 0 ORDER BY `Medical_Treatment` ASC"; // Use correct column name
+    $sql_all_treat = "SELECT `Medical_Treatment_ID`, `Medical_Treatment`
+                      FROM `MEDICAL_TREATMENT`
+                      WHERE `Medical_Treatment_ID` != 0
+                        AND `Treatment_Type` <> 'Medication'
+                      ORDER BY `Medical_Treatment` ASC";
     $res_all_treat = $conn->query($sql_all_treat);
     if($res_all_treat) { while($r = $res_all_treat->fetch_assoc()){ $all_treatments[] = $r; } }
 
-    // Fetch Existing Medicines for this appointment (Appointment_Medicine replaces Prescription tables)
-     $sql_presc = "SELECT am.`Dosage`, m.`Medicine_Name` FROM `Appointment_Medicine` am JOIN `Medicine` m ON am.`Medicine_ID` = m.`Medicine_ID` WHERE am.`Appointment_ID` = ? ORDER BY m.`Medicine_Name`";
+    // Fetch existing medication-type treatments for this appointment
+     $sql_presc = "SELECT atr.`Dosage`, mt.`Medication_Name`
+                   FROM `Appointment_Treatment` atr
+                   JOIN `Medical_Treatment` mt ON atr.`Medical_Treatment_ID` = mt.`Medical_Treatment_ID`
+                   WHERE atr.`Appointment_ID` = ?
+                     AND mt.`Treatment_Type` = 'Medication'
+                     AND mt.`Medication_Name` IS NOT NULL
+                   ORDER BY mt.`Medication_Name`";
      $stmt_presc = $conn->prepare($sql_presc);
      if($stmt_presc){ 
         $stmt_presc->bind_param("i", $appointment_id); 
@@ -109,16 +119,20 @@ if ($appointment_details) { // Only fetch if appointment is valid
                 if(!$prescription_details) { 
                     $prescription_details = ['Prescription_Date' => $appointment_details['Appointment_Date'], 'Prescription_ID' => $appointment_id]; 
                 } 
-                $existing_prescription_medicines[] = ['Medicine_Name' => $r['Medicine_Name'], 'Dosage' => $r['Dosage']]; 
+                $existing_prescription_medicines[] = ['Medication_Name' => $r['Medication_Name'], 'Dosage' => $r['Dosage']]; 
             }
         }
         $stmt_presc->close(); 
      }
 
-    // *** YENİ: Fetch All Medicines for dropdown ***
-    $sql_all_med = "SELECT `Medicine_ID`, `Medicine_Name` FROM `MEDICINE` ORDER BY `Medicine_Name` ASC";
+    // Fetch all medication-type treatments for dropdown
+    $sql_all_med = "SELECT `Medical_Treatment_ID`, `Medication_Name`
+                    FROM `MEDICAL_TREATMENT`
+                    WHERE `Treatment_Type` = 'Medication'
+                      AND `Medication_Name` IS NOT NULL
+                    ORDER BY `Medication_Name` ASC";
     $res_all_med = $conn->query($sql_all_med);
-    if($res_all_med) { while($r = $res_all_med->fetch_assoc()){ $all_medicines[] = $r; } }
+    if($res_all_med) { while($r = $res_all_med->fetch_assoc()){ $all_medication_treatments[] = $r; } }
 
     // Fetch Existing Bill (if any)
     $sql_bill_exist = "SELECT `Bill_ID`, `Total_Amount`, `Issue_Date`, `Status`, `Payment_Method`, `Paid_At`, `Payment_Reference`
@@ -395,7 +409,7 @@ $conn->close();
                          <?php if(!empty($existing_prescription_medicines)): ?>
                              <ul>
                                  <?php foreach ($existing_prescription_medicines as $med):
-                                      echo '<li><strong>' . htmlspecialchars($med['Medicine_Name']) . ':</strong> ' . htmlspecialchars($med['Dosage']) . '</li>';
+                                     echo '<li><strong>' . htmlspecialchars($med['Medication_Name']) . ':</strong> ' . htmlspecialchars($med['Dosage']) . '</li>';
                                  endforeach; ?>
                              </ul>
                          <?php else: ?>
@@ -415,15 +429,15 @@ $conn->close();
                              <?php endif; ?>
 
                              <div class="form-group">
-                                 <label for="medicine_id">Select Medicine:</label>
-                                 <select name="medicine_id" id="medicine_id" required>
+                                <label for="medicine_id">Select Medication:</label>
+                                <select name="medicine_id" id="medicine_id" required>
                                      <option value="" disabled selected>-- Choose Medicine --</option>
                                      <?php
                                      // Create a list of existing medicine names on this prescription for filtering
-                                     $existing_med_names = array_column($existing_prescription_medicines, 'Medicine_Name');
-                                     foreach ($all_medicines as $med_option) {
-                                         if (!in_array($med_option['Medicine_Name'], $existing_med_names)) {
-                                            echo "<option value=\"" . htmlspecialchars($med_option['Medicine_ID']) . "\">" . htmlspecialchars($med_option['Medicine_Name']) . "</option>";
+                                    $existing_med_names = array_column($existing_prescription_medicines, 'Medication_Name');
+                                    foreach ($all_medication_treatments as $med_option) {
+                                        if (!in_array($med_option['Medication_Name'], $existing_med_names)) {
+                                           echo "<option value=\"" . htmlspecialchars($med_option['Medical_Treatment_ID']) . "\">" . htmlspecialchars($med_option['Medication_Name']) . "</option>";
                                          }
                                      }
                                      ?>

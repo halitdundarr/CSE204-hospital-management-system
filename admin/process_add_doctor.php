@@ -40,8 +40,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($clinic_id === false || $clinic_id <= 0) $errors[] = "Please select a valid clinic.";
     if (empty($password)) $errors[] = "Password is required.";
 
-    // Check uniqueness only if basic validation passed
+    // Check ownership + uniqueness only if basic validation passed
     if (empty($errors)) {
+        $clinic_sql = "SELECT `Clinic_ID` FROM `Clinic` WHERE `Clinic_ID` = ? AND `Admin_ID` = ?";
+        $clinic_stmt = $conn->prepare($clinic_sql);
+        if (!$clinic_stmt) {
+            $errors[] = "Could not validate clinic ownership.";
+        } else {
+            $clinic_stmt->bind_param("ii", $clinic_id, $admin_id);
+            $clinic_stmt->execute();
+            $clinic_result = $clinic_stmt->get_result();
+            if ($clinic_result->num_rows !== 1) {
+                $errors[] = "You can only assign doctors to clinics managed by your admin account.";
+            }
+            $clinic_stmt->close();
+        }
+
         $check_sql = "SELECT `Doctor_ID` FROM `DOCTOR` WHERE `Doctor_Email` = ?";
         $check_stmt = $conn->prepare($check_sql);
         $check_stmt->bind_param("s", $email);
@@ -68,21 +82,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Prepare INSERT statement
-    $insert_sql = "INSERT INTO `DOCTOR` (`Doctor_First_Name`, `Doctor_Last_Name`, `Doctor_Gender`, `Doctor_Email`, `Doctor_Phone`, `Clinic_ID`, `Doctor_Password`, `Admin_ID`)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $insert_sql = "INSERT INTO `DOCTOR` (`Doctor_First_Name`, `Doctor_Last_Name`, `Doctor_Gender`, `Doctor_Email`, `Doctor_Phone`, `Clinic_ID`, `Doctor_Password`)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)";
     $insert_stmt = $conn->prepare($insert_sql);
 
     if ($insert_stmt) {
         // *** GÜNCELLENDİ: bind_param tipleri düzeltildi ***
-        $insert_stmt->bind_param("sssssisi", // Doğru tipler: 5 string, 1 integer, 1 string, 1 integer
+        $insert_stmt->bind_param("sssssis",
                                  $first_name,
                                  $last_name,
                                  $gender,
                                  $email,
                                  $phone,
                                  $clinic_id,
-                                 $hashed_password,
-                                 $admin_id  // Session'dan gelen admin ID (integer)
+                                 $hashed_password
                                 );
 
         if ($insert_stmt->execute()) {

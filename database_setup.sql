@@ -154,29 +154,45 @@ INSERT INTO `Appointment_Test` (`Appointment_ID`, `Test_ID`, `Test_Result`) VALU
 
 CREATE TABLE `Appointment_Treatment` (
   `Appointment_ID` int(11) NOT NULL,
-  `Medical_Treatment_ID` int(11) NOT NULL
+  `Medical_Treatment_ID` int(11) NOT NULL,
+  `Dosage` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `Appointment_Treatment`
 --
 
-INSERT INTO `Appointment_Treatment` (`Appointment_ID`, `Medical_Treatment_ID`) VALUES
-(1, 1),
-(2, 1),
-(3, 1),
-(4, 2),
-(5, 1),
-(6, 3),
-(7, 0),
-(8, 0),
-(9, 1),
-(10, 1),
-(11, 4),
-(12, 3),
-(13, 1),
-(14, 1),
-(15, 0);
+INSERT INTO `Appointment_Treatment` (`Appointment_ID`, `Medical_Treatment_ID`, `Dosage`) VALUES
+(1, 1, NULL),
+(2, 1, NULL),
+(3, 1, NULL),
+(4, 2, NULL),
+(5, 1, NULL),
+(6, 3, NULL),
+(7, 0, NULL),
+(8, 0, NULL),
+(9, 1, NULL),
+(10, 1, NULL),
+(11, 4, NULL),
+(12, 3, NULL),
+(13, 1, NULL),
+(14, 1, NULL),
+(15, 0, NULL),
+(1, 5, '2x1'),
+(1, 6, '3x1'),
+(2, 7, '1x1'),
+(3, 8, '1x1'),
+(4, 9, '2x1'),
+(4, 10, '1x2'),
+(5, 11, '1x1'),
+(6, 12, '1x1'),
+(9, 13, '1x1'),
+(10, 14, '1x2'),
+(11, 15, '1x1'),
+(12, 12, '1x1'),
+(13, 16, '1x1'),
+(13, 17, '1x1'),
+(14, 18, '1x2');
 
 -- --------------------------------------------------------
 
@@ -186,19 +202,20 @@ INSERT INTO `Appointment_Treatment` (`Appointment_ID`, `Medical_Treatment_ID`) V
 
 CREATE TABLE `Clinic` (
   `Clinic_ID` int(11) NOT NULL,
-  `Clinic_Name` varchar(255) NOT NULL
+  `Clinic_Name` varchar(255) NOT NULL,
+  `Admin_ID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `Clinic`
 --
 
-INSERT INTO `Clinic` (`Clinic_ID`, `Clinic_Name`) VALUES
-(1, 'Dermatology'),
-(2, 'Cardiology'),
-(3, 'Neurosurgery'),
-(4, 'Internal Medicine'),
-(5, 'Ophthalmology');
+INSERT INTO `Clinic` (`Clinic_ID`, `Clinic_Name`, `Admin_ID`) VALUES
+(1, 'Dermatology', 1),
+(2, 'Cardiology', 2),
+(3, 'Neurosurgery', 1),
+(4, 'Internal Medicine', 2),
+(5, 'Ophthalmology', 2);
 
 -- --------------------------------------------------------
 
@@ -241,21 +258,20 @@ CREATE TABLE `Doctor` (
   `Doctor_Email` varchar(255) NOT NULL,
   `Doctor_Phone` varchar(20) DEFAULT NULL,
   `Clinic_ID` int(11) DEFAULT NULL,
-  `Doctor_Password` varchar(255) NOT NULL,
-  `Admin_ID` int(11) DEFAULT NULL
+  `Doctor_Password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `Doctor`
 --
 
-INSERT INTO `Doctor` (`Doctor_ID`, `Doctor_First_Name`, `Doctor_Last_Name`, `Doctor_Gender`, `Doctor_Email`, `Doctor_Phone`, `Clinic_ID`, `Doctor_Password`, `Admin_ID`) VALUES
-(1, 'Halit', 'Dündar', 'Male', 'halit@email.com', NULL, 1, '$2y$10$V.agDknTZDvYQvt9oGWHfufFZhCKI2bfQ9xH1./BF89enk4vIBjSi', 1),
-(2, 'Seyhan', 'Günay', 'Male', 'seyhan@email.com', NULL, 2, '$2y$10$sNqeFnEd1ZfXyuptiduJ9uM6asIzGl6Fa1lmyn5EIY3qQDJMvsOKe', 2),
-(3, 'Tolunay', 'Tunca', 'Male', 'tolunay@email.com', NULL, 3, '$2y$10$Xni5OrrFJgj/uULW5KBNXOMCBwHZhmWvFi4Q1mInpbyY2TmtXJNZy', 1),
-(4, 'Yusuf', 'Fidan', 'Male', 'yusuf@email.com', NULL, 4, '$2y$10$ZLU8IcTqnG0hUi.Zrnt4Gu0821It.BTqQi4a3FUaCwdXy9wz8B6FS', 2),
-(5, 'Anıl', 'Yeşil', 'Male', 'anıl@email.com', NULL, 5, '$2y$10$GqhuCnuhJgKF1nV6ByyqMe.ryYrM814wxfJ8NhA4EJ3s98/d/KqcO', 2),
-(6, 'Yiğit', 'Ertaş', 'Male', 'yigit@email.com', NULL, 3, '$2y$10$Uc56e9GhEZfpriA/OMj5DunYBT5QgE6CxleI5zECTgQuO/borB8wC', 1);
+INSERT INTO `Doctor` (`Doctor_ID`, `Doctor_First_Name`, `Doctor_Last_Name`, `Doctor_Gender`, `Doctor_Email`, `Doctor_Phone`, `Clinic_ID`, `Doctor_Password`) VALUES
+(1, 'Halit', 'Dündar', 'Male', 'halit@email.com', NULL, 1, '$2y$10$V.agDknTZDvYQvt9oGWHfufFZhCKI2bfQ9xH1./BF89enk4vIBjSi'),
+(2, 'Seyhan', 'Günay', 'Male', 'seyhan@email.com', NULL, 2, '$2y$10$sNqeFnEd1ZfXyuptiduJ9uM6asIzGl6Fa1lmyn5EIY3qQDJMvsOKe'),
+(3, 'Tolunay', 'Tunca', 'Male', 'tolunay@email.com', NULL, 3, '$2y$10$Xni5OrrFJgj/uULW5KBNXOMCBwHZhmWvFi4Q1mInpbyY2TmtXJNZy'),
+(4, 'Yusuf', 'Fidan', 'Male', 'yusuf@email.com', NULL, 4, '$2y$10$ZLU8IcTqnG0hUi.Zrnt4Gu0821It.BTqQi4a3FUaCwdXy9wz8B6FS'),
+(5, 'Anıl', 'Yeşil', 'Male', 'anıl@email.com', NULL, 5, '$2y$10$GqhuCnuhJgKF1nV6ByyqMe.ryYrM814wxfJ8NhA4EJ3s98/d/KqcO'),
+(6, 'Yiğit', 'Ertaş', 'Male', 'yigit@email.com', NULL, 3, '$2y$10$Uc56e9GhEZfpriA/OMj5DunYBT5QgE6CxleI5zECTgQuO/borB8wC');
 
 -- --------------------------------------------------------
 
@@ -265,54 +281,39 @@ INSERT INTO `Doctor` (`Doctor_ID`, `Doctor_First_Name`, `Doctor_Last_Name`, `Doc
 
 CREATE TABLE `Medical_Treatment` (
   `Medical_Treatment_ID` int(11) NOT NULL,
-  `Medical_Treatment` varchar(255) NOT NULL
+  `Medical_Treatment` varchar(255) NOT NULL,
+  `Treatment_Type` enum('Procedure','Medication','Other') NOT NULL DEFAULT 'Procedure',
+  `Medication_Name` varchar(255) DEFAULT NULL,
+  `Default_Dosage` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `Medical_Treatment`
 --
 
-INSERT INTO `Medical_Treatment` (`Medical_Treatment_ID`, `Medical_Treatment`) VALUES
-(0, 'No Treatment'),
-(1, 'Medicine Treatment'),
-(2, 'VP Shunt Surgery'),
-(3, 'Surgery'),
-(4, 'Lens Replacement');
+INSERT INTO `Medical_Treatment` (`Medical_Treatment_ID`, `Medical_Treatment`, `Treatment_Type`, `Medication_Name`, `Default_Dosage`) VALUES
+(0, 'No Treatment', 'Other', NULL, NULL),
+(1, 'Medication (General)', 'Medication', NULL, NULL),
+(2, 'VP Shunt Surgery', 'Procedure', NULL, NULL),
+(3, 'Surgery', 'Procedure', NULL, NULL),
+(4, 'Lens Replacement', 'Procedure', NULL, NULL),
+(5, 'Prednol Prescription', 'Medication', 'Prednol', NULL),
+(6, 'Fusidic Acid Prescription', 'Medication', 'Fusidic Acid', NULL),
+(7, 'Furosemide Prescription', 'Medication', 'Furosemide', NULL),
+(8, 'Cetirizine Prescription', 'Medication', 'Cetirizine', NULL),
+(9, 'Acetaminophen Prescription', 'Medication', 'Acetaminophen', NULL),
+(10, 'Ibuprofen Prescription', 'Medication', 'Ibuprofen', NULL),
+(11, 'Insulin Glargine Prescription', 'Medication', 'Insulin Glargine', NULL),
+(12, 'Cefazolin Prescription', 'Medication', 'Cefazolin', NULL),
+(13, 'Loratadine Prescription', 'Medication', 'Loratadine', NULL),
+(14, 'Timolol Prescription', 'Medication', 'Timolol', NULL),
+(15, 'Bimatoprost Prescription', 'Medication', 'Bimatoprost', NULL),
+(16, 'Lisinopril Prescription', 'Medication', 'Lisinopril', NULL),
+(17, 'Hydrochlorothiazide Prescription', 'Medication', 'Hydrochlorothiazide', NULL),
+(18, 'Valproate Prescription', 'Medication', 'Valproate', NULL);
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `Medicine`
---
-
-CREATE TABLE `Medicine` (
-  `Medicine_ID` int(11) NOT NULL,
-  `Medicine_Name` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `Medicine`
---
-
-INSERT INTO `Medicine` (`Medicine_ID`, `Medicine_Name`) VALUES
-(1, 'Prednol'),
-(2, 'Fusidic Acid'),
-(3, 'Furosemide'),
-(4, 'Cetirizine'),
-(5, 'Acetaminophen'),
-(6, 'Ibuprofen'),
-(7, 'Insulin Glargine'),
-(8, 'Cefazolin'),
-(9, 'Loratadine'),
-(10, 'Timolol'),
-(11, 'Bimatoprost'),
-(12, 'Lisinopril'),
-(13, 'Hydrochlorothiazide'),
-(14, 'Valproate');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `Nurse`
 --
 
@@ -323,23 +324,22 @@ CREATE TABLE `Nurse` (
   `Nurse_Gender` varchar(10) DEFAULT NULL,
   `Nurse_Email` varchar(255) NOT NULL,
   `Nurse_Phone` varchar(20) DEFAULT NULL,
-  `Clinic_ID` int(11) DEFAULT NULL,
-  `Admin_ID` int(11) DEFAULT NULL
+  `Clinic_ID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `Nurse`
 --
 
-INSERT INTO `Nurse` (`Nurse_ID`, `Nurse_First_Name`, `Nurse_Last_Name`, `Nurse_Gender`, `Nurse_Email`, `Nurse_Phone`, `Clinic_ID`, `Admin_ID`) VALUES
-(1, 'Meryem', 'Şeker', 'Female', 'meryem@email.com', NULL, 1, 1),
-(2, 'Tunahan', 'Aktaş', 'Male', 'tuna@email.com', NULL, 2, 1),
-(3, 'Derya', 'Işık', 'Female', 'derya@email.com', NULL, 1, 2),
-(4, 'Büşra', 'Tekin', 'Female', 'büsra@email.com', NULL, 3, 1),
-(5, 'Kaan', 'Çevik', 'Male', 'kaan@email.com', NULL, 4, 1),
-(6, 'Meryem', 'Bozdağ', 'Female', 'meryembozdag@email.com', NULL, 2, 2),
-(7, 'Enes', 'Öztürk', 'Male', 'enes@email.com', NULL, 3, 2),
-(8, 'Gamze', 'Can', 'Female', 'gamze@email.com', NULL, 5, 2);
+INSERT INTO `Nurse` (`Nurse_ID`, `Nurse_First_Name`, `Nurse_Last_Name`, `Nurse_Gender`, `Nurse_Email`, `Nurse_Phone`, `Clinic_ID`) VALUES
+(1, 'Meryem', 'Şeker', 'Female', 'meryem@email.com', NULL, 1),
+(2, 'Tunahan', 'Aktaş', 'Male', 'tuna@email.com', NULL, 2),
+(3, 'Derya', 'Işık', 'Female', 'derya@email.com', NULL, 1),
+(4, 'Büşra', 'Tekin', 'Female', 'büsra@email.com', NULL, 3),
+(5, 'Kaan', 'Çevik', 'Male', 'kaan@email.com', NULL, 4),
+(6, 'Meryem', 'Bozdağ', 'Female', 'meryembozdag@email.com', NULL, 2),
+(7, 'Enes', 'Öztürk', 'Male', 'enes@email.com', NULL, 3),
+(8, 'Gamze', 'Can', 'Female', 'gamze@email.com', NULL, 5);
 
 -- --------------------------------------------------------
 
@@ -434,40 +434,6 @@ INSERT INTO `Patient` (`Patient_ID`, `Patient_First_Name`, `Patient_Last_Name`, 
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `Appointment_Medicine`
---
-
-CREATE TABLE `Appointment_Medicine` (
-  `Appointment_ID` int(11) NOT NULL,
-  `Medicine_ID` int(11) NOT NULL,
-  `Dosage` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `Appointment_Medicine`
---
-
-INSERT INTO `Appointment_Medicine` (`Appointment_ID`, `Medicine_ID`, `Dosage`) VALUES
-(1, 1, '2x1'),
-(1, 2, '3x1'),
-(2, 3, '1x1'),
-(3, 4, '1x1'),
-(4, 5, '2x1'),
-(4, 6, '1x2'),
-(5, 7, '1x1'),
-(6, 8, '1x1'),
-(9, 9, '1x1'),
-(10, 10, '1x2'),
-(11, 11, '1x1'),
-(12, 8, '1x1'),
-(13, 12, '1x1'),
-(13, 13, '1x1'),
-(14, 14, '1x2');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `Test`
 --
 
@@ -500,7 +466,6 @@ INSERT INTO `Test` (`Test_ID`, `Test_Name`) VALUES
 
 CREATE TABLE `Bill` (
   `Bill_ID` int(11) NOT NULL,
-  `Patient_ID` bigint(20) NOT NULL,
   `Appointment_ID` int(11) NOT NULL,
   `Total_Amount` decimal(10,2) NOT NULL,
   `Issue_Date` date NOT NULL,
@@ -514,10 +479,10 @@ CREATE TABLE `Bill` (
 -- Dumping data for table `Bill`
 --
 
-INSERT INTO `Bill` (`Bill_ID`, `Patient_ID`, `Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`, `Payment_Method`, `Paid_At`, `Payment_Reference`) VALUES
-(1, 43543543565, 1, 100.00, '2024-03-02', 'Unpaid', NULL, NULL, NULL),
-(2, 43543543565, 2, 250.50, '2024-05-03', 'Paid', 'CreditCard', '2024-05-03 15:20:00', 'POS-TRX-20240503-001'),
-(3, 23423423477, 3, 75.25, '2024-02-12', 'Unpaid', NULL, NULL, NULL);
+INSERT INTO `Bill` (`Bill_ID`, `Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`, `Payment_Method`, `Paid_At`, `Payment_Reference`) VALUES
+(1, 1, 100.00, '2024-03-02', 'Unpaid', NULL, NULL, NULL),
+(2, 2, 250.50, '2024-05-03', 'Paid', 'CreditCard', '2024-05-03 15:20:00', 'POS-TRX-20240503-001'),
+(3, 3, 75.25, '2024-02-12', 'Unpaid', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -567,7 +532,8 @@ ALTER TABLE `Appointment_Treatment`
 -- Indexes for table `Clinic`
 --
 ALTER TABLE `Clinic`
-  ADD PRIMARY KEY (`Clinic_ID`);
+  ADD PRIMARY KEY (`Clinic_ID`),
+  ADD KEY `Admin_ID` (`Admin_ID`);
 
 --
 -- Indexes for table `Diagnosis`
@@ -581,8 +547,7 @@ ALTER TABLE `Diagnosis`
 ALTER TABLE `Doctor`
   ADD PRIMARY KEY (`Doctor_ID`),
   ADD UNIQUE KEY `Doctor_Email` (`Doctor_Email`),
-  ADD KEY `Clinic_ID` (`Clinic_ID`),
-  ADD KEY `Admin_ID` (`Admin_ID`);
+  ADD KEY `Clinic_ID` (`Clinic_ID`);
 
 --
 -- Indexes for table `Medical_Treatment`
@@ -590,34 +555,18 @@ ALTER TABLE `Doctor`
 ALTER TABLE `Medical_Treatment`
   ADD PRIMARY KEY (`Medical_Treatment_ID`);
 
---
--- Indexes for table `Medicine`
---
-ALTER TABLE `Medicine`
-  ADD PRIMARY KEY (`Medicine_ID`);
-
---
 -- Indexes for table `Nurse`
 --
 ALTER TABLE `Nurse`
   ADD PRIMARY KEY (`Nurse_ID`),
   ADD UNIQUE KEY `Nurse_Email` (`Nurse_Email`),
-  ADD KEY `Clinic_ID` (`Clinic_ID`),
-  ADD KEY `Admin_ID` (`Admin_ID`);
+  ADD KEY `Clinic_ID` (`Clinic_ID`);
 
 --
 -- Indexes for table `Patient`
 --
 ALTER TABLE `Patient`
   ADD PRIMARY KEY (`Patient_ID`);
-
---
---
--- Indexes for table `Appointment_Medicine`
---
-ALTER TABLE `Appointment_Medicine`
-  ADD PRIMARY KEY (`Appointment_ID`,`Medicine_ID`),
-  ADD KEY `Medicine_ID` (`Medicine_ID`);
 
 --
 -- Indexes for table `Secretary`
@@ -655,7 +604,6 @@ ALTER TABLE `Test`
 --
 ALTER TABLE `Bill`
   ADD PRIMARY KEY (`Bill_ID`),
-  ADD KEY `Patient_ID` (`Patient_ID`),
   ADD UNIQUE KEY `uniq_bill_appointment` (`Appointment_ID`);
 
 --
@@ -696,13 +644,7 @@ ALTER TABLE `Doctor`
 -- AUTO_INCREMENT for table `Medical_Treatment`
 --
 ALTER TABLE `Medical_Treatment`
-  MODIFY `Medical_Treatment_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT for table `Medicine`
---
-ALTER TABLE `Medicine`
-  MODIFY `Medicine_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `Medical_Treatment_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `Nurse`
@@ -777,16 +719,20 @@ ALTER TABLE `Appointment_Treatment`
 --
 -- Constraints for table `Doctor`
 --
+ALTER TABLE `Clinic`
+  ADD CONSTRAINT `clinic_ibfk_1` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
+
+--
+-- Constraints for table `Doctor`
+--
 ALTER TABLE `Doctor`
-  ADD CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`),
-  ADD CONSTRAINT `doctor_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
+  ADD CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`);
 
 --
 -- Constraints for table `Nurse`
 --
 ALTER TABLE `Nurse`
-  ADD CONSTRAINT `nurse_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`),
-  ADD CONSTRAINT `nurse_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
+  ADD CONSTRAINT `nurse_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`);
 
 --
 -- Constraints for table `Secretary`
@@ -807,19 +753,10 @@ ALTER TABLE `Translator`
 ALTER TABLE `Appointment_Support_Staff`
   ADD CONSTRAINT `appointment_support_staff_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE;
 
---
--- Constraints for table `Appointment_Medicine`
---
-ALTER TABLE `Appointment_Medicine`
-  ADD CONSTRAINT `appointment_medicine_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE,
-  ADD CONSTRAINT `appointment_medicine_ibfk_2` FOREIGN KEY (`Medicine_ID`) REFERENCES `Medicine` (`Medicine_ID`);
-
---
 -- Constraints for table `Bill`
 --
 ALTER TABLE `Bill`
-  ADD CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`Patient_ID`) REFERENCES `Patient` (`Patient_ID`),
-  ADD CONSTRAINT `bill_ibfk_2` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE;
+  ADD CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

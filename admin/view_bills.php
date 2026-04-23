@@ -29,7 +29,7 @@ $sql = "SELECT
             d.`Doctor_Last_Name`
         FROM `Bill` b
         JOIN `Appointment` a ON b.`Appointment_ID` = a.`Appointment_ID`
-        JOIN `Patient` p ON b.`Patient_ID` = p.`Patient_ID`
+        JOIN `Patient` p ON a.`Patient_ID` = p.`Patient_ID`
         JOIN `Doctor` d ON a.`Doctor_ID` = d.`Doctor_ID`
         ORDER BY b.`Issue_Date` DESC, b.`Bill_ID` DESC";
 

@@ -55,6 +55,10 @@
 
 - `tests/sql/feature_expansion_checks.sql` validates:
   - `Bill` payment columns exist (`Payment_Method`, `Paid_At`, `Payment_Reference`).
+  - `Bill.Patient_ID` is removed (patient comes from `Appointment`).
+  - `Clinic.Admin_ID` exists and `Doctor/Nurse.Admin_ID` columns are removed.
+  - Medication is represented in `Medical_Treatment` (`Treatment_Type='Medication'`).
+  - Legacy `Appointment_Medicine` table is removed.
   - New minimum-scope staff tables exist (`Secretary`, `Translator`, `Appointment_Support_Staff`).
   - Seed data includes at least one paid bill with payment method.
   - Last-year appointment count query structure works across patient set.

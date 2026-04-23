@@ -41,6 +41,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
 
     if ($check_result->num_rows === 1) {
         // Doctor authorized
+        $treatment_type_sql = "SELECT `Treatment_Type` FROM `Medical_Treatment` WHERE `Medical_Treatment_ID` = ?";
+        $treatment_type_stmt = $conn->prepare($treatment_type_sql);
+        if (!$treatment_type_stmt) {
+            $_SESSION['manage_patient_feedback'] = "Error validating treatment type.";
+            $_SESSION['manage_patient_feedback_type'] = "error";
+            $check_stmt->close();
+            $conn->close();
+            header("Location: manage_patient.php?appointment_id=$appointment_id&patient_id=$patient_id#treatments");
+            exit;
+        }
+        $treatment_type_stmt->bind_param("i", $treatment_id);
+        $treatment_type_stmt->execute();
+        $treatment_type_result = $treatment_type_stmt->get_result()->fetch_assoc();
+        $treatment_type_stmt->close();
+
+        if (!$treatment_type_result || $treatment_type_result['Treatment_Type'] === 'Medication') {
+            $_SESSION['manage_patient_feedback'] = "Please use prescription flow to add medication-type treatments.";
+            $_SESSION['manage_patient_feedback_type'] = "error";
+            $check_stmt->close();
+            $conn->close();
+            header("Location: manage_patient.php?appointment_id=$appointment_id&patient_id=$patient_id#treatments");
+            exit;
+        }
 
         // Check for duplicates
         $duplicate_sql = "SELECT COUNT(*) as count FROM `Appointment_Treatment` WHERE `Appointment_ID` = ? AND `Medical_Treatment_ID` = ?";

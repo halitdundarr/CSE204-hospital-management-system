@@ -39,8 +39,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($phone)) $errors[] = "Phone number is required.";
     if ($clinic_id === false || $clinic_id <= 0) $errors[] = "Please select a valid clinic.";
 
-    // Check if email or phone already exists only if base validation passed
+    // Check ownership + uniqueness only if base validation passed
     if (empty($errors)) {
+        $clinic_sql = "SELECT `Clinic_ID` FROM `Clinic` WHERE `Clinic_ID` = ? AND `Admin_ID` = ?";
+        $clinic_stmt = $conn->prepare($clinic_sql);
+        if (!$clinic_stmt) {
+            $errors[] = "Could not validate clinic ownership.";
+        } else {
+            $clinic_stmt->bind_param("ii", $clinic_id, $admin_id);
+            $clinic_stmt->execute();
+            $clinic_result = $clinic_stmt->get_result();
+            if ($clinic_result->num_rows !== 1) {
+                $errors[] = "You can only assign nurses to clinics managed by your admin account.";
+            }
+            $clinic_stmt->close();
+        }
+
         $check_sql = "SELECT `Nurse_ID` FROM `NURSE` WHERE `Nurse_Email` = ? OR `Nurse_Phone` = ?";
         $check_stmt = $conn->prepare($check_sql);
         if ($check_stmt) {
@@ -66,20 +80,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Prepare INSERT statement
     // Use correct table name `NURSE` and column names from dump
-    $insert_sql = "INSERT INTO `NURSE` (`Nurse_First_Name`, `Nurse_Last_Name`, `Nurse_Gender`, `Nurse_Email`, `Nurse_Phone`, `Clinic_ID`, `Admin_ID`)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)"; // 7 placeholders
+    $insert_sql = "INSERT INTO `NURSE` (`Nurse_First_Name`, `Nurse_Last_Name`, `Nurse_Gender`, `Nurse_Email`, `Nurse_Phone`, `Clinic_ID`)
+                   VALUES (?, ?, ?, ?, ?, ?)"; // 6 placeholders
     $insert_stmt = $conn->prepare($insert_sql);
 
     if ($insert_stmt) {
         // Bind parameters (s=string, i=integer)
-        $insert_stmt->bind_param("sssssii",
+        $insert_stmt->bind_param("sssssi",
                                  $first_name,
                                  $last_name,
                                  $gender,
                                  $email,
                                  $phone,
-                                 $clinic_id,
-                                 $admin_id // Use logged-in admin ID
+                                 $clinic_id
                                 );
 
         if ($insert_stmt->execute()) {

@@ -11,15 +11,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 }
 
 $admin_user_name = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
+$admin_id = (int) $_SESSION['user_id'];
 
 // Fetch Clinics for dropdown
 $clinics = [];
-$sql_clinics = "SELECT `Clinic_ID`, `Clinic_Name` FROM `CLINIC` ORDER BY `Clinic_Name`";
-$result_clinics = $conn->query($sql_clinics);
-if ($result_clinics) {
+$sql_clinics = "SELECT `Clinic_ID`, `Clinic_Name` FROM `CLINIC` WHERE `Admin_ID` = ? ORDER BY `Clinic_Name`";
+$stmt_clinics = $conn->prepare($sql_clinics);
+if ($stmt_clinics) {
+    $stmt_clinics->bind_param("i", $admin_id);
+    $stmt_clinics->execute();
+    $result_clinics = $stmt_clinics->get_result();
     while ($row = $result_clinics->fetch_assoc()) {
         $clinics[] = $row;
     }
+    $stmt_clinics->close();
 }
 
 

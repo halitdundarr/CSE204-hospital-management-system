@@ -137,8 +137,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
         }
         $stmt_update->close();
     } else {
-        $sql_insert = "INSERT INTO `Bill` (`Patient_ID`, `Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`, `Payment_Method`, `Paid_At`, `Payment_Reference`)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql_insert = "INSERT INTO `Bill` (`Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`, `Payment_Method`, `Paid_At`, `Payment_Reference`)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt_insert = $conn->prepare($sql_insert);
         if (!$stmt_insert) {
             $_SESSION['manage_patient_feedback'] = "Database error while preparing insert.";
@@ -146,7 +146,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
             header("Location: manage_patient.php?appointment_id=$appointment_id&patient_id=$patient_id#billing");
             exit;
         }
-        $stmt_insert->bind_param("iidsssss", $patient_id, $appointment_id, $total_amount, $issue_date, $status, $payment_method, $paid_at, $payment_reference);
+        $stmt_insert->bind_param("idsssss", $appointment_id, $total_amount, $issue_date, $status, $payment_method, $paid_at, $payment_reference);
 
         if ($stmt_insert->execute()) {
             $new_bill_id = $conn->insert_id;

@@ -20,12 +20,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
     }
 
     $appointment_id = filter_var($_POST['appointment_id'], FILTER_VALIDATE_INT);
-    $medicine_id = filter_var($_POST['medicine_id'], FILTER_VALIDATE_INT);
+    $treatment_id = filter_var($_POST['medicine_id'], FILTER_VALIDATE_INT);
     $dosage = trim($_POST['dosage']);
     $patient_id = filter_var($_POST['patient_id'], FILTER_VALIDATE_INT);
 
     // Validation
-    if ($appointment_id === false || $medicine_id === false || $patient_id === false || empty($dosage) || $medicine_id <= 0) {
+    if ($appointment_id === false || $treatment_id === false || $patient_id === false || empty($dosage) || $treatment_id <= 0) {
         $_SESSION['manage_patient_feedback'] = "Invalid input for prescription medicine.";
         $_SESSION['manage_patient_feedback_type'] = "error";
         $redirect_url = $appointment_id && $patient_id ? "manage_patient.php?appointment_id=$appointment_id&patient_id=$patient_id" : "view_appointments.php";
@@ -49,20 +49,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
         exit;
     }
 
-    // Check for duplicate medicine in this appointment
-    $dup_med_sql = "SELECT COUNT(*) as count FROM `Appointment_Medicine` WHERE `Appointment_ID` = ? AND `Medicine_ID` = ?";
+    // Verify selected treatment is medication type
+    $validate_treatment_sql = "SELECT `Medical_Treatment_ID`
+                               FROM `Medical_Treatment`
+                               WHERE `Medical_Treatment_ID` = ?
+                                 AND `Treatment_Type` = 'Medication'";
+    $validate_treatment_stmt = $conn->prepare($validate_treatment_sql);
+    if (!$validate_treatment_stmt) {
+        $_SESSION['manage_patient_feedback'] = "Could not validate medication type.";
+        $_SESSION['manage_patient_feedback_type'] = "error";
+        header("Location: manage_patient.php?appointment_id=$appointment_id&patient_id=$patient_id#prescription");
+        exit;
+    }
+    $validate_treatment_stmt->bind_param("i", $treatment_id);
+    $validate_treatment_stmt->execute();
+    $validate_treatment_result = $validate_treatment_stmt->get_result();
+    if ($validate_treatment_result->num_rows !== 1) {
+        $validate_treatment_stmt->close();
+        $_SESSION['manage_patient_feedback'] = "Selected treatment is not a medication.";
+        $_SESSION['manage_patient_feedback_type'] = "error";
+        header("Location: manage_patient.php?appointment_id=$appointment_id&patient_id=$patient_id#prescription");
+        exit;
+    }
+    $validate_treatment_stmt->close();
+
+    // Check for duplicate medication-type treatment in this appointment
+    $dup_med_sql = "SELECT COUNT(*) as count FROM `Appointment_Treatment` WHERE `Appointment_ID` = ? AND `Medical_Treatment_ID` = ?";
     $dup_med_stmt = $conn->prepare($dup_med_sql);
-    $dup_med_stmt->bind_param("ii", $appointment_id, $medicine_id);
+    $dup_med_stmt->bind_param("ii", $appointment_id, $treatment_id);
     $dup_med_stmt->execute();
     $dup_med_res = $dup_med_stmt->get_result()->fetch_assoc();
     $dup_med_stmt->close();
 
     if ($dup_med_res['count'] == 0) {
-        // Insert into Appointment_Medicine
-        $insert_med_sql = "INSERT INTO `Appointment_Medicine` (`Appointment_ID`, `Medicine_ID`, `Dosage`) VALUES (?, ?, ?)";
+        // Insert medication as treatment
+        $insert_med_sql = "INSERT INTO `Appointment_Treatment` (`Appointment_ID`, `Medical_Treatment_ID`, `Dosage`) VALUES (?, ?, ?)";
         $insert_med_stmt = $conn->prepare($insert_med_sql);
         if ($insert_med_stmt) {
-            $insert_med_stmt->bind_param("iis", $appointment_id, $medicine_id, $dosage);
+            $insert_med_stmt->bind_param("iis", $appointment_id, $treatment_id, $dosage);
             if ($insert_med_stmt->execute()) {
                 $_SESSION['manage_patient_feedback'] = "Medicine added to prescription successfully.";
                 $_SESSION['manage_patient_feedback_type'] = "success";

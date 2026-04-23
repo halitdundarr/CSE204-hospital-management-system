@@ -28,7 +28,7 @@ $sql = "SELECT
         FROM `Bill` b
         JOIN `Appointment` a ON b.`Appointment_ID` = a.`Appointment_ID`
         JOIN `Doctor` d ON a.`Doctor_ID` = d.`Doctor_ID`
-        WHERE b.`Patient_ID` = ?
+        WHERE a.`Patient_ID` = ?
         ORDER BY b.`Issue_Date` DESC, b.`Bill_ID` DESC";
 
 $stmt = $conn->prepare($sql);
