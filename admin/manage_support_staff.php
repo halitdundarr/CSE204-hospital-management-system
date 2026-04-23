@@ -143,10 +143,13 @@ $conn->close();
                     <tbody>
                         <?php foreach ($existing_assignments as $assignment): ?>
                             <?php
-                            $staff_name = $assignment['Staff_Type'] === 'Secretary'
-                                ? trim(($assignment['Secretary_First_Name'] ?? '') . ' ' . ($assignment['Secretary_Last_Name'] ?? ''))
-                                : trim(($assignment['Translator_First_Name'] ?? '') . ' ' . ($assignment['Translator_Last_Name'] ?? '')) . ' (' . ($assignment['Language'] ?? 'N/A') . ')';
-                            if ($staff_name === '' || $staff_name === ' (N/A)') {
+                            if ($assignment['Staff_Type'] === 'Secretary') {
+                                $staff_name = trim(($assignment['Secretary_First_Name'] ?? '') . ' ' . ($assignment['Secretary_Last_Name'] ?? ''));
+                            } else {
+                                $name_part = trim(($assignment['Translator_First_Name'] ?? '') . ' ' . ($assignment['Translator_Last_Name'] ?? ''));
+                                $staff_name = $name_part !== '' ? $name_part . ' (' . ($assignment['Language'] ?? 'N/A') . ')' : '';
+                            }
+                            if ($staff_name === '') {
                                 $staff_name = 'Deleted or missing staff record';
                             }
                             ?>

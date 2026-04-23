@@ -30,6 +30,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($delete_stmt) {
         $delete_stmt->bind_param("i", $assignment_id);
         if ($delete_stmt->execute() && $delete_stmt->affected_rows > 0) {
+            audit_log_action(
+                $conn,
+                'admin',
+                (int)$_SESSION['user_id'],
+                'ADMIN_REMOVE_SUPPORT_STAFF_ASSIGNMENT',
+                'Appointment_Support_Staff',
+                $assignment_id
+            );
             $_SESSION['admin_support_staff_feedback'] = "Support staff assignment removed.";
             $_SESSION['admin_support_staff_feedback_type'] = "success";
         } else {
