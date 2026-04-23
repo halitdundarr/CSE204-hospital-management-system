@@ -36,7 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 (int)$_SESSION['user_id'],
                 'ADMIN_REMOVE_SUPPORT_STAFF_ASSIGNMENT',
                 'Appointment_Support_Staff',
-                $assignment_id
+                $assignment_id,
+                ['assignment_id' => $assignment_id]
             );
             $_SESSION['admin_support_staff_feedback'] = "Support staff assignment removed.";
             $_SESSION['admin_support_staff_feedback_type'] = "success";
