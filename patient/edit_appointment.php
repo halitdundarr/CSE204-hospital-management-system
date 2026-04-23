@@ -92,10 +92,10 @@ unset($_SESSION['patient_edit_appointment_feedback_type']);
          <ul>
             <li><a href="book_appointment.php">Book New Appointment</a></li>
             <li><a href="view_appointments.php">View Appointments</a></li>
-            <li><a href="#">Book Follow-up</a></li>
             <li><a href="view_prescriptions.php">View Prescriptions</a></li>
             <li><a href="view_diagnoses.php">View Diagnoses</a></li>
             <li><a href="view_tests.php">View Tests & Results</a></li>
+            <li><a href="view_bills.php">View Bills</a></li>
         </ul>
          <div class="logout-link">
              <a href="../logout.php">Logout</a>
