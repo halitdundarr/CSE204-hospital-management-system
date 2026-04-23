@@ -3,8 +3,6 @@ session_start();
 require_once 'includes/db_connect.php'; // Veritabanı bağlantısı
 require_once 'includes/functions.php';
 
-// === Güvenlik Uyarısı: Gerçek uygulamada şifreleri hash'leyin! ===
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -91,9 +89,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $is_valid_password = false;
 
         if (is_string($stored_password) && password_verify($password, $stored_password)) {
-            $is_valid_password = true;
-        } elseif ($password === $stored_password) {
-            // Backward compatibility for legacy plain-text records.
             $is_valid_password = true;
         }
 

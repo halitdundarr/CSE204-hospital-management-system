@@ -39,16 +39,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($phone)) $errors[] = "Phone number is required.";
     if ($clinic_id === false || $clinic_id <= 0) $errors[] = "Please select a valid clinic.";
 
-    // Check if email or phone already exists
-    $check_sql = "SELECT `Nurse_ID` FROM `NURSE` WHERE `Nurse_Email` = ? OR `Nurse_Phone` = ?";
-    $check_stmt = $conn->prepare($check_sql);
-    $check_stmt->bind_param("ss", $email, $phone);
-    $check_stmt->execute();
-    $check_result = $check_stmt->get_result();
-    if ($check_result->num_rows > 0) {
-        $errors[] = "This email or phone number is already registered for another nurse.";
+    // Check if email or phone already exists only if base validation passed
+    if (empty($errors)) {
+        $check_sql = "SELECT `Nurse_ID` FROM `NURSE` WHERE `Nurse_Email` = ? OR `Nurse_Phone` = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        if ($check_stmt) {
+            $check_stmt->bind_param("ss", $email, $phone);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+            if ($check_result->num_rows > 0) {
+                $errors[] = "This email or phone number is already registered for another nurse.";
+            }
+            $check_stmt->close();
+        } else {
+            $errors[] = "Could not validate nurse uniqueness at this time.";
+        }
     }
-    $check_stmt->close();
 
     if (!empty($errors)) {
         // If errors, store them and redirect back
