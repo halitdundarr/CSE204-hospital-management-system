@@ -77,7 +77,13 @@ $conn->close();
             <li><a href="add_secretary.php">Add New Secretary</a></li>
             <li><a href="add_translator.php">Add New Translator</a></li>
             <li><a href="manage_support_staff.php">Assign Support Staff</a></li>
+            <li><a href="add_patient.php">Add New Patient</a></li>
+            <li><a href="find_patient_doctors.php">List Patient's Doctors</a></li>
+            <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>
             <li><a href="manage_appointments.php">Manage Appointments</a></li>
+            <li><a href="reports.php">View Reports</a></li>
+            <li><a href="audit_logs.php">View Audit Logs</a></li>
+            <li><a href="view_bills.php">View Bills</a></li>
         </ul>
         <div class="logout-link"><a href="../logout.php">Logout</a></div>
     </div>
