@@ -180,6 +180,7 @@ $conn->close();
     <div class="sidebar">
         <h2>Doctor Menu</h2>
         <ul>
+            <li><a href="dashboard.php">Dashboard</a></li>
             <li><a href="view_appointments.php">View Appointments</a></li>
         </ul>
          <div class="logout-link">
