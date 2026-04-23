@@ -66,6 +66,13 @@ if ($stmt) {
 } else {
     $fetch_error = "Error fetching patient and appointment data: " . $conn->error;
 }
+
+// Sort by appointment count in descending order for quick reporting
+if (!empty($patients_data)) {
+    uasort($patients_data, static function ($a, $b) {
+        return count($b['appointments']) <=> count($a['appointments']);
+    });
+}
 $conn->close();
 ?>
 <!DOCTYPE html>
@@ -109,6 +116,9 @@ $conn->close();
         <ul>
         <li><a href="add_doctor.php">Add New Doctor</a></li>
             <li><a href="add_nurse.php">Add New Nurse</a></li>
+            <li><a href="add_secretary.php">Add New Secretary</a></li>
+            <li><a href="add_translator.php">Add New Translator</a></li>
+            <li><a href="manage_support_staff.php">Assign Support Staff</a></li>
             <li><a href="add_patient.php">Add New Patient</a></li>
             <li><a href="find_patient_doctors.php">List Patient's Doctors</a></li>
             <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>
@@ -125,7 +135,7 @@ $conn->close();
         </div>
 
         <div class="content-section">
-            <h2>Patient List</h2>
+            <h2>Patient List and Annual Appointment Counts</h2>
 
             <?php if ($fetch_error): ?>
                 <p style="color: red;"><?php echo htmlspecialchars($fetch_error); ?></p>
@@ -136,7 +146,11 @@ $conn->close();
                     <div class="patient-block">
                         <div class="patient-details">
                             <h3><?php echo htmlspecialchars($data['details']['Patient_First_Name'] . ' ' . $data['details']['Patient_Last_Name']); ?></h3>
-                            <p>ID: <?php echo htmlspecialchars($patient_id); ?> | Phone: <?php echo htmlspecialchars($data['details']['Patient_Phone'] ?? 'N/A'); ?></p>
+                            <p>
+                                ID: <?php echo htmlspecialchars($patient_id); ?>
+                                | Phone: <?php echo htmlspecialchars($data['details']['Patient_Phone'] ?? 'N/A'); ?>
+                                | Appointments in Last Year: <strong><?php echo count($data['appointments']); ?></strong>
+                            </p>
                         </div>
                         <div class="appointments-list">
                             <?php if (!empty($data['appointments'])): ?>

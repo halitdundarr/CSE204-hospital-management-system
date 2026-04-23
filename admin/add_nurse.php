@@ -63,6 +63,9 @@ unset($_SESSION['admin_feedback_type']);
         <ul>
         <li><a href="add_doctor.php">Add New Doctor</a></li>
             <li><a href="add_nurse.php">Add New Nurse</a></li>
+            <li><a href="add_secretary.php">Add New Secretary</a></li>
+            <li><a href="add_translator.php">Add New Translator</a></li>
+            <li><a href="manage_support_staff.php">Assign Support Staff</a></li>
             <li><a href="add_patient.php">Add New Patient</a></li>
             <li><a href="find_patient_doctors.php">List Patient's Doctors</a></li>
             <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>

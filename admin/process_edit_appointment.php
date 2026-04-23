@@ -35,8 +35,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
         header("Location: " . $feedback_redirect_url);
         exit;
     }
-     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $new_date)) { /* ... date format error ... */ header("Location: " . $feedback_redirect_url); exit; }
-     if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $new_time)) { /* ... time format error ... */ header("Location: " . $feedback_redirect_url); exit; }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $new_date) || strtotime($new_date) < strtotime(date('Y-m-d'))) {
+        $_SESSION['admin_edit_appointment_feedback'] = "Invalid date format or date is in the past.";
+        $_SESSION['admin_edit_appointment_feedback_type'] = "error";
+        header("Location: " . $feedback_redirect_url);
+        exit;
+    }
+    if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $new_time)) {
+        $_SESSION['admin_edit_appointment_feedback'] = "Invalid time format.";
+        $_SESSION['admin_edit_appointment_feedback_type'] = "error";
+        header("Location: " . $feedback_redirect_url);
+        exit;
+    }
      $new_time_db = date('H:i:s', strtotime($new_time));
 
 

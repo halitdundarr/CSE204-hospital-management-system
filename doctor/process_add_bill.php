@@ -23,6 +23,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
     $appointment_id = filter_var($_POST['appointment_id'], FILTER_VALIDATE_INT);
     $patient_id = filter_var($_POST['patient_id'], FILTER_VALIDATE_INT);
     $status = trim($_POST['status']);
+    $payment_method = trim($_POST['payment_method'] ?? '');
+    $payment_reference_raw = trim($_POST['payment_reference'] ?? '');
     $total_amount_raw = trim($_POST['total_amount']);
 
     // Basic validation
@@ -32,6 +34,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
     }
     if ($status !== 'Paid' && $status !== 'Unpaid') {
         $errors[] = "Invalid status selected.";
+    }
+    $allowed_methods = ['Cash', 'CreditCard', 'Bitcoin', 'Other'];
+    if ($status === 'Paid') {
+        if (!in_array($payment_method, $allowed_methods, true)) {
+            $errors[] = "Please select a valid payment method for paid bills.";
+        }
+    } else {
+        $payment_method = null;
+    }
+    if ($payment_reference_raw !== '' && strlen($payment_reference_raw) > 255) {
+        $errors[] = "Payment reference cannot exceed 255 characters.";
     }
     if ($total_amount_raw === '' || !is_numeric($total_amount_raw) || (float)$total_amount_raw < 0) {
         $errors[] = "Please enter a valid total amount.";
@@ -69,6 +82,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
 
     // Create or update bill for this appointment (unique by Appointment_ID)
     $issue_date = date('Y-m-d');
+    $paid_at = $status === 'Paid' ? date('Y-m-d H:i:s') : null;
+    $payment_reference = $payment_reference_raw !== '' ? $payment_reference_raw : null;
     $total_amount = (float)$total_amount_raw;
 
     $sql_bill = "SELECT `Bill_ID` FROM `Bill` WHERE `Appointment_ID` = ? LIMIT 1";
@@ -87,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
 
     if ($existing_bill) {
         $sql_update = "UPDATE `Bill`
-                        SET `Total_Amount` = ?, `Issue_Date` = ?, `Status` = ?
+                        SET `Total_Amount` = ?, `Issue_Date` = ?, `Status` = ?, `Payment_Method` = ?, `Paid_At` = ?, `Payment_Reference` = ?
                         WHERE `Bill_ID` = ?";
         $stmt_update = $conn->prepare($sql_update);
         if (!$stmt_update) {
@@ -97,7 +112,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
             exit;
         }
         $bill_id = (int)$existing_bill['Bill_ID'];
-        $stmt_update->bind_param("dssi", $total_amount, $issue_date, $status, $bill_id);
+        $stmt_update->bind_param("dsssssi", $total_amount, $issue_date, $status, $payment_method, $paid_at, $payment_reference, $bill_id);
 
         if ($stmt_update->execute()) {
             audit_log_action(
@@ -107,7 +122,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
                 'UPDATE_BILL',
                 'Bill',
                 $bill_id,
-                ['appointment_id' => $appointment_id, 'total_amount' => $total_amount, 'status' => $status]
+                [
+                    'appointment_id' => $appointment_id,
+                    'total_amount' => $total_amount,
+                    'status' => $status,
+                    'payment_method' => $payment_method ?? 'Unknown/Legacy'
+                ]
             );
             $_SESSION['manage_patient_feedback'] = "Bill updated successfully.";
             $_SESSION['manage_patient_feedback_type'] = "success";
@@ -117,8 +137,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
         }
         $stmt_update->close();
     } else {
-        $sql_insert = "INSERT INTO `Bill` (`Patient_ID`, `Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`)
-                        VALUES (?, ?, ?, ?, ?)";
+        $sql_insert = "INSERT INTO `Bill` (`Patient_ID`, `Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`, `Payment_Method`, `Paid_At`, `Payment_Reference`)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt_insert = $conn->prepare($sql_insert);
         if (!$stmt_insert) {
             $_SESSION['manage_patient_feedback'] = "Database error while preparing insert.";
@@ -126,7 +146,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
             header("Location: manage_patient.php?appointment_id=$appointment_id&patient_id=$patient_id#billing");
             exit;
         }
-        $stmt_insert->bind_param("iidss", $patient_id, $appointment_id, $total_amount, $issue_date, $status);
+        $stmt_insert->bind_param("iidsssss", $patient_id, $appointment_id, $total_amount, $issue_date, $status, $payment_method, $paid_at, $payment_reference);
 
         if ($stmt_insert->execute()) {
             $new_bill_id = $conn->insert_id;
@@ -137,7 +157,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id'], $_PO
                 'CREATE_BILL',
                 'Bill',
                 $new_bill_id,
-                ['appointment_id' => $appointment_id, 'total_amount' => $total_amount, 'status' => $status]
+                [
+                    'appointment_id' => $appointment_id,
+                    'total_amount' => $total_amount,
+                    'status' => $status,
+                    'payment_method' => $payment_method ?? 'Unknown/Legacy'
+                ]
             );
             $_SESSION['manage_patient_feedback'] = "Bill created successfully.";
             $_SESSION['manage_patient_feedback_type'] = "success";

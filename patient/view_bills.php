@@ -18,6 +18,9 @@ $sql = "SELECT
             b.`Total_Amount`,
             b.`Issue_Date`,
             b.`Status` AS `Bill_Status`,
+            b.`Payment_Method`,
+            b.`Paid_At`,
+            b.`Payment_Reference`,
             a.`Appointment_Date`,
             a.`Appointment_Time`,
             d.`Doctor_First_Name`,
@@ -98,6 +101,9 @@ $conn->close();
                             <th>Doctor</th>
                             <th>Total Amount (₺)</th>
                             <th>Status</th>
+                            <th>Payment Method</th>
+                            <th>Paid At</th>
+                            <th>Reference</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -113,6 +119,9 @@ $conn->close();
                                 <td>Dr. <?php echo htmlspecialchars($bill['Doctor_First_Name'] . ' ' . $bill['Doctor_Last_Name']); ?></td>
                                 <td><?php echo htmlspecialchars(number_format((float)$bill['Total_Amount'], 2)); ?></td>
                                 <td><span class="<?php echo $status_class; ?>"><?php echo htmlspecialchars($status); ?></span></td>
+                                <td><?php echo htmlspecialchars($bill['Payment_Method'] ?? 'Unknown/Legacy'); ?></td>
+                                <td><?php echo !empty($bill['Paid_At']) ? htmlspecialchars(date("d-m-Y H:i", strtotime($bill['Paid_At']))) : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($bill['Payment_Reference'] ?? 'N/A'); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

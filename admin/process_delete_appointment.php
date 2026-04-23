@@ -71,10 +71,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id_to_dele
                      $_SESSION['admin_manage_appointment_feedback_type'] = "error";
                 }
             } else {
-                // Hata durumunda daha fazla detay loglanabilir veya gösterilebilir
-                // error_log("Delete failed for Appt ID $appointment_id: " . $stmt->error);
-                 $_SESSION['admin_manage_appointment_feedback'] = "Error deleting appointment. Please check dependencies or logs."; // Genel hata
-                 $_SESSION['admin_manage_appointment_feedback_type'] = "error";
+                if ((int)$stmt->errno === 1451) {
+                    $_SESSION['admin_manage_appointment_feedback'] = "This appointment cannot be deleted because related records still reference it.";
+                } else {
+                    $_SESSION['admin_manage_appointment_feedback'] = "Error deleting appointment: " . $stmt->error;
+                }
+                $_SESSION['admin_manage_appointment_feedback_type'] = "error";
             }
             $stmt->close();
         } else {

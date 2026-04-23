@@ -18,6 +18,9 @@ $sql = "SELECT
             b.`Total_Amount`,
             b.`Issue_Date`,
             b.`Status` AS `Bill_Status`,
+            b.`Payment_Method`,
+            b.`Paid_At`,
+            b.`Payment_Reference`,
             p.`Patient_First_Name`,
             p.`Patient_Last_Name`,
             a.`Appointment_Date`,
@@ -67,6 +70,9 @@ $conn->close();
         <ul>
             <li><a href="add_doctor.php">Add New Doctor</a></li>
             <li><a href="add_nurse.php">Add New Nurse</a></li>
+            <li><a href="add_secretary.php">Add New Secretary</a></li>
+            <li><a href="add_translator.php">Add New Translator</a></li>
+            <li><a href="manage_support_staff.php">Assign Support Staff</a></li>
             <li><a href="add_patient.php">Add New Patient</a></li>
             <li><a href="find_patient_doctors.php">List Patient's Doctors</a></li>
             <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>
@@ -104,6 +110,9 @@ $conn->close();
                             <th>Doctor</th>
                             <th>Total Amount (₺)</th>
                             <th>Status</th>
+                            <th>Payment Method</th>
+                            <th>Paid At</th>
+                            <th>Reference</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,6 +130,9 @@ $conn->close();
                                 <td>Dr. <?php echo htmlspecialchars($bill['Doctor_First_Name'] . ' ' . $bill['Doctor_Last_Name']); ?></td>
                                 <td><?php echo htmlspecialchars(number_format((float)$bill['Total_Amount'], 2)); ?></td>
                                 <td><span class="<?php echo $status_class; ?>"><?php echo htmlspecialchars($status); ?></span></td>
+                                <td><?php echo htmlspecialchars($bill['Payment_Method'] ?? 'Unknown/Legacy'); ?></td>
+                                <td><?php echo !empty($bill['Paid_At']) ? htmlspecialchars(date("d-m-Y H:i", strtotime($bill['Paid_At']))) : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($bill['Payment_Reference'] ?? 'N/A'); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

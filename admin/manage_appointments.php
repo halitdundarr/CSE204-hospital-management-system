@@ -68,6 +68,9 @@ $conn->close();
         <ul>
         <li><a href="add_doctor.php">Add New Doctor</a></li>
             <li><a href="add_nurse.php">Add New Nurse</a></li>
+            <li><a href="add_secretary.php">Add New Secretary</a></li>
+            <li><a href="add_translator.php">Add New Translator</a></li>
+            <li><a href="manage_support_staff.php">Assign Support Staff</a></li>
             <li><a href="add_patient.php">Add New Patient</a></li>
             <li><a href="find_patient_doctors.php">List Patient's Doctors</a></li>
             <li><a href="view_all_patients_appointments.php">View All Patients & Appointments</a></li>
@@ -86,6 +89,7 @@ $conn->close();
 
         <div class="content-section">
             <h2>Appointment List</h2>
+            <p><small>Delete permanently removes the appointment. If you only need to stop it operationally, prefer canceling from patient/admin cancel flows.</small></p>
 
              <?php if ($feedback_message): ?>
                 <div class="message <?php echo $feedback_type === 'success' ? 'success' : 'error'; ?>">

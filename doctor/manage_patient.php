@@ -121,7 +121,7 @@ if ($appointment_details) { // Only fetch if appointment is valid
     if($res_all_med) { while($r = $res_all_med->fetch_assoc()){ $all_medicines[] = $r; } }
 
     // Fetch Existing Bill (if any)
-    $sql_bill_exist = "SELECT `Bill_ID`, `Total_Amount`, `Issue_Date`, `Status`
+    $sql_bill_exist = "SELECT `Bill_ID`, `Total_Amount`, `Issue_Date`, `Status`, `Payment_Method`, `Paid_At`, `Payment_Reference`
                         FROM `Bill`
                         WHERE `Appointment_ID` = ?
                         LIMIT 1";
@@ -327,6 +327,9 @@ $conn->close();
                         <p><strong>Issue Date:</strong> <?php echo htmlspecialchars($existing_bill['Issue_Date'] ? date("d-m-Y", strtotime($existing_bill['Issue_Date'])) : 'N/A'); ?></p>
                         <p><strong>Current Total:</strong> <?php echo htmlspecialchars($existing_bill['Total_Amount']); ?></p>
                         <p><strong>Status:</strong> <?php echo htmlspecialchars($existing_bill['Status']); ?></p>
+                        <p><strong>Payment Method:</strong> <?php echo htmlspecialchars($existing_bill['Payment_Method'] ?? 'Unknown/Legacy'); ?></p>
+                        <p><strong>Paid At:</strong> <?php echo !empty($existing_bill['Paid_At']) ? htmlspecialchars(date("d-m-Y H:i", strtotime($existing_bill['Paid_At']))) : 'N/A'; ?></p>
+                        <p><strong>Payment Reference:</strong> <?php echo htmlspecialchars($existing_bill['Payment_Reference'] ?? 'N/A'); ?></p>
                     <?php else: ?>
                         <p class="no-data">No bill created for this appointment yet.</p>
                     <?php endif; ?>
@@ -357,6 +360,26 @@ $conn->close();
                                     <option value="Unpaid" <?php echo (($existing_bill['Status'] ?? 'Unpaid') === 'Unpaid') ? 'selected' : ''; ?>>Unpaid</option>
                                     <option value="Paid" <?php echo (($existing_bill['Status'] ?? 'Unpaid') === 'Paid') ? 'selected' : ''; ?>>Paid</option>
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="payment_method">Payment Method:</label>
+                                <select id="payment_method" name="payment_method">
+                                    <option value="" <?php echo empty($existing_bill['Payment_Method']) ? 'selected' : ''; ?>>-- Select Method --</option>
+                                    <option value="Cash" <?php echo (($existing_bill['Payment_Method'] ?? '') === 'Cash') ? 'selected' : ''; ?>>Cash</option>
+                                    <option value="CreditCard" <?php echo (($existing_bill['Payment_Method'] ?? '') === 'CreditCard') ? 'selected' : ''; ?>>Credit Card</option>
+                                    <option value="Bitcoin" <?php echo (($existing_bill['Payment_Method'] ?? '') === 'Bitcoin') ? 'selected' : ''; ?>>Bitcoin</option>
+                                    <option value="Other" <?php echo (($existing_bill['Payment_Method'] ?? '') === 'Other') ? 'selected' : ''; ?>>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="payment_reference">Payment Reference (Optional):</label>
+                                <input
+                                    type="text"
+                                    id="payment_reference"
+                                    name="payment_reference"
+                                    maxlength="255"
+                                    value="<?php echo htmlspecialchars($existing_bill['Payment_Reference'] ?? ''); ?>"
+                                >
                             </div>
 
                             <button type="submit"><?php echo $existing_bill ? 'Update Bill' : 'Create Bill'; ?></button>
@@ -420,5 +443,26 @@ $conn->close();
             <?php endif; ?>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const statusSelect = document.getElementById('status');
+            const methodSelect = document.getElementById('payment_method');
+
+            function syncPaymentMethodRequirement() {
+                if (!statusSelect || !methodSelect) return;
+                if (statusSelect.value === 'Paid') {
+                    methodSelect.setAttribute('required', 'required');
+                } else {
+                    methodSelect.removeAttribute('required');
+                    methodSelect.value = '';
+                }
+            }
+
+            if (statusSelect && methodSelect) {
+                statusSelect.addEventListener('change', syncPaymentMethodRequirement);
+                syncPaymentMethodRequirement();
+            }
+        });
+    </script>
 </body>
 </html>

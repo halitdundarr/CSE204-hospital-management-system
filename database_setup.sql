@@ -344,6 +344,67 @@ INSERT INTO `Nurse` (`Nurse_ID`, `Nurse_First_Name`, `Nurse_Last_Name`, `Nurse_G
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `Secretary`
+--
+
+CREATE TABLE `Secretary` (
+  `Secretary_ID` int(11) NOT NULL,
+  `Secretary_First_Name` varchar(100) NOT NULL,
+  `Secretary_Last_Name` varchar(100) NOT NULL,
+  `Secretary_Email` varchar(255) NOT NULL,
+  `Secretary_Phone` varchar(20) DEFAULT NULL,
+  `Clinic_ID` int(11) DEFAULT NULL,
+  `Admin_ID` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Secretary`
+--
+
+INSERT INTO `Secretary` (`Secretary_ID`, `Secretary_First_Name`, `Secretary_Last_Name`, `Secretary_Email`, `Secretary_Phone`, `Clinic_ID`, `Admin_ID`) VALUES
+(1, 'Ayse', 'Demir', 'ayse.secretary@email.com', '5551000001', 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Translator`
+--
+
+CREATE TABLE `Translator` (
+  `Translator_ID` int(11) NOT NULL,
+  `Translator_First_Name` varchar(100) NOT NULL,
+  `Translator_Last_Name` varchar(100) NOT NULL,
+  `Translator_Email` varchar(255) NOT NULL,
+  `Translator_Phone` varchar(20) DEFAULT NULL,
+  `Language` varchar(100) NOT NULL,
+  `Admin_ID` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Translator`
+--
+
+INSERT INTO `Translator` (`Translator_ID`, `Translator_First_Name`, `Translator_Last_Name`, `Translator_Email`, `Translator_Phone`, `Language`, `Admin_ID`) VALUES
+(1, 'Mehmet', 'Yildiz', 'mehmet.translator@email.com', '5551000002', 'English', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Appointment_Support_Staff`
+--
+
+CREATE TABLE `Appointment_Support_Staff` (
+  `Assignment_ID` int(11) NOT NULL,
+  `Appointment_ID` int(11) NOT NULL,
+  `Staff_Type` enum('Secretary','Translator') NOT NULL,
+  `Staff_ID` int(11) NOT NULL,
+  `Notes` varchar(255) DEFAULT NULL,
+  `Assigned_At` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Patient`
 --
 
@@ -443,17 +504,20 @@ CREATE TABLE `Bill` (
   `Appointment_ID` int(11) NOT NULL,
   `Total_Amount` decimal(10,2) NOT NULL,
   `Issue_Date` date NOT NULL,
-  `Status` enum('Paid','Unpaid') NOT NULL DEFAULT 'Unpaid'
+  `Status` enum('Paid','Unpaid') NOT NULL DEFAULT 'Unpaid',
+  `Payment_Method` enum('Cash','CreditCard','Bitcoin','Other') DEFAULT NULL,
+  `Paid_At` datetime DEFAULT NULL,
+  `Payment_Reference` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `Bill`
 --
 
-INSERT INTO `Bill` (`Bill_ID`, `Patient_ID`, `Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`) VALUES
-(1, 43543543565, 1, 100.00, '2024-03-02', 'Unpaid'),
-(2, 43543543565, 2, 250.50, '2024-05-03', 'Paid'),
-(3, 23423423477, 3, 75.25, '2024-02-12', 'Unpaid');
+INSERT INTO `Bill` (`Bill_ID`, `Patient_ID`, `Appointment_ID`, `Total_Amount`, `Issue_Date`, `Status`, `Payment_Method`, `Paid_At`, `Payment_Reference`) VALUES
+(1, 43543543565, 1, 100.00, '2024-03-02', 'Unpaid', NULL, NULL, NULL),
+(2, 43543543565, 2, 250.50, '2024-05-03', 'Paid', 'CreditCard', '2024-05-03 15:20:00', 'POS-TRX-20240503-001'),
+(3, 23423423477, 3, 75.25, '2024-02-12', 'Unpaid', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -556,6 +620,31 @@ ALTER TABLE `Appointment_Medicine`
   ADD KEY `Medicine_ID` (`Medicine_ID`);
 
 --
+-- Indexes for table `Secretary`
+--
+ALTER TABLE `Secretary`
+  ADD PRIMARY KEY (`Secretary_ID`),
+  ADD UNIQUE KEY `Secretary_Email` (`Secretary_Email`),
+  ADD KEY `Clinic_ID` (`Clinic_ID`),
+  ADD KEY `Admin_ID` (`Admin_ID`);
+
+--
+-- Indexes for table `Translator`
+--
+ALTER TABLE `Translator`
+  ADD PRIMARY KEY (`Translator_ID`),
+  ADD UNIQUE KEY `Translator_Email` (`Translator_Email`),
+  ADD KEY `Admin_ID` (`Admin_ID`);
+
+--
+-- Indexes for table `Appointment_Support_Staff`
+--
+ALTER TABLE `Appointment_Support_Staff`
+  ADD PRIMARY KEY (`Assignment_ID`),
+  ADD KEY `Appointment_ID` (`Appointment_ID`),
+  ADD KEY `Staff_Type_Staff_ID` (`Staff_Type`,`Staff_ID`);
+
+--
 -- Indexes for table `Test`
 --
 ALTER TABLE `Test`
@@ -622,6 +711,24 @@ ALTER TABLE `Nurse`
   MODIFY `Nurse_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
+-- AUTO_INCREMENT for table `Secretary`
+--
+ALTER TABLE `Secretary`
+  MODIFY `Secretary_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `Translator`
+--
+ALTER TABLE `Translator`
+  MODIFY `Translator_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `Appointment_Support_Staff`
+--
+ALTER TABLE `Appointment_Support_Staff`
+  MODIFY `Assignment_ID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `Test`
 --
 ALTER TABLE `Test`
@@ -680,6 +787,25 @@ ALTER TABLE `Doctor`
 ALTER TABLE `Nurse`
   ADD CONSTRAINT `nurse_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`),
   ADD CONSTRAINT `nurse_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
+
+--
+-- Constraints for table `Secretary`
+--
+ALTER TABLE `Secretary`
+  ADD CONSTRAINT `secretary_ibfk_1` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`),
+  ADD CONSTRAINT `secretary_ibfk_2` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
+
+--
+-- Constraints for table `Translator`
+--
+ALTER TABLE `Translator`
+  ADD CONSTRAINT `translator_ibfk_1` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
+
+--
+-- Constraints for table `Appointment_Support_Staff`
+--
+ALTER TABLE `Appointment_Support_Staff`
+  ADD CONSTRAINT `appointment_support_staff_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `Appointment_Medicine`
