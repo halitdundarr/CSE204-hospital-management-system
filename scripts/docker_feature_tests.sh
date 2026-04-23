@@ -4,8 +4,19 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
-echo "[1/6] Resetting Docker stack (fresh DB init)..."
-docker compose down -v --remove-orphans
+RESET_DB="${RESET_DB:-}"
+if [[ -z "$RESET_DB" && "${CI:-}" == "true" ]]; then
+  RESET_DB="1"
+fi
+
+if [[ "$RESET_DB" == "1" ]]; then
+  echo "[1/6] Resetting Docker stack with volume wipe (fresh DB init)..."
+  docker compose down -v --remove-orphans
+else
+  echo "[1/6] Resetting Docker stack without wiping volumes..."
+  echo "Tip: use RESET_DB=1 for a full database reset."
+  docker compose down --remove-orphans
+fi
 
 echo "[2/6] Building and starting containers..."
 docker compose up -d --build
