@@ -30,7 +30,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($delete_stmt) {
         $delete_stmt->bind_param("i", $assignment_id);
         if (!$delete_stmt->execute()) {
-            $_SESSION['admin_support_staff_feedback'] = "Database error while removing assignment: " . $delete_stmt->error;
+            error_log("Support staff assignment delete failed for ID {$assignment_id}: " . $delete_stmt->error);
+            $_SESSION['admin_support_staff_feedback'] = "A database error occurred while removing the assignment.";
             $_SESSION['admin_support_staff_feedback_type'] = "error";
         } elseif ($delete_stmt->affected_rows > 0) {
             audit_log_action(

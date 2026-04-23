@@ -87,12 +87,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $stored_password = $user[$password_col];
         $is_valid_password = false;
+        $needs_rehash_migration = false;
 
         if (is_string($stored_password) && password_verify($password, $stored_password)) {
             $is_valid_password = true;
+        } elseif (is_string($stored_password)) {
+            // Backward-compatible migration path:
+            // if a legacy plaintext password matches, allow login once and immediately upgrade it to bcrypt.
+            $password_info = password_get_info($stored_password);
+            if (($password_info['algo'] ?? 0) === 0 && hash_equals($stored_password, $password)) {
+                $is_valid_password = true;
+                $needs_rehash_migration = true;
+            }
         }
 
         if ($is_valid_password) {
+            if ($needs_rehash_migration) {
+                $new_hash = password_hash($password, PASSWORD_DEFAULT);
+                if ($new_hash !== false) {
+                    $update_sql = "UPDATE $table_name SET `$password_col` = ? WHERE $identifier_col = ?";
+                    $update_stmt = $conn->prepare($update_sql);
+                    if ($update_stmt) {
+                        $update_bind_types = "s" . $id_param_type;
+                        $update_stmt->bind_param($update_bind_types, $new_hash, $identifier);
+                        $update_stmt->execute();
+                        $update_stmt->close();
+                    }
+                }
+            }
 
             // Prevent session fixation by issuing a fresh session id after login.
             session_regenerate_id(true);
