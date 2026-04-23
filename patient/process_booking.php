@@ -89,29 +89,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 ]
             );
             $_SESSION['booking_success'] = "Appointment booked successfully for " . htmlspecialchars($appointment_date) . " at " . htmlspecialchars(substr($appointment_time, 0, 5)) . ".";
+            $stmt->close();
+            $conn->close();
             header("Location: dashboard.php");
             exit;
         } else {
             $_SESSION['booking_error'] = "Failed to book appointment. Database error. Please try again.";
             // error_log("Booking failed: " . $stmt->error);
+            $stmt->close();
+            $conn->close();
             $redirect_url = "book_appointment.php?";
              if ($clinic_id) $redirect_url .= "clinic_id=" . $clinic_id;
              if ($follow_up_for_id) $redirect_url .= ($clinic_id ? "&" : "") . "follow_up_for=" . $follow_up_for_id . "&doctor_id=" . $doctor_id;
             header("Location: " . $redirect_url);
             exit;
         }
-        $stmt->close();
     } else {
         $_SESSION['booking_error'] = "Failed to book appointment due to a server error. Please try again later.";
         // error_log("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+        $conn->close();
         $redirect_url = "book_appointment.php?";
          if ($clinic_id) $redirect_url .= "clinic_id=" . $clinic_id;
          if ($follow_up_for_id) $redirect_url .= ($clinic_id ? "&" : "") . "follow_up_for=" . $follow_up_for_id . "&doctor_id=" . $doctor_id;
         header("Location: " . $redirect_url);
         exit;
     }
-
-    $conn->close();
 
 } else {
     header("Location: book_appointment.php");

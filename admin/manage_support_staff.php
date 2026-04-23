@@ -137,14 +137,21 @@ $conn->close();
                             <th>Staff</th>
                             <th>Notes</th>
                             <th>Assigned At</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($existing_assignments as $assignment): ?>
                             <?php
-                            $staff_name = $assignment['Staff_Type'] === 'Secretary'
-                                ? trim(($assignment['Secretary_First_Name'] ?? '') . ' ' . ($assignment['Secretary_Last_Name'] ?? ''))
-                                : trim(($assignment['Translator_First_Name'] ?? '') . ' ' . ($assignment['Translator_Last_Name'] ?? '')) . ' (' . ($assignment['Language'] ?? 'N/A') . ')';
+                            if ($assignment['Staff_Type'] === 'Secretary') {
+                                $staff_name = trim(($assignment['Secretary_First_Name'] ?? '') . ' ' . ($assignment['Secretary_Last_Name'] ?? ''));
+                            } else {
+                                $name_part = trim(($assignment['Translator_First_Name'] ?? '') . ' ' . ($assignment['Translator_Last_Name'] ?? ''));
+                                $staff_name = $name_part !== '' ? $name_part . ' (' . ($assignment['Language'] ?? 'N/A') . ')' : '';
+                            }
+                            if ($staff_name === '') {
+                                $staff_name = 'Deleted or missing staff record';
+                            }
                             ?>
                             <tr>
                                 <td>#<?php echo (int)$assignment['Appointment_ID']; ?></td>
@@ -152,6 +159,13 @@ $conn->close();
                                 <td><?php echo htmlspecialchars($staff_name); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['Notes'] ?? ''); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['Assigned_At']); ?></td>
+                                <td>
+                                    <form action="process_remove_support_staff.php" method="POST" onsubmit="return confirm('Remove this support staff assignment?');">
+                                        <?php echo csrf_input_field(); ?>
+                                        <input type="hidden" name="assignment_id" value="<?php echo (int)$assignment['Assignment_ID']; ?>">
+                                        <button type="submit">Remove</button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

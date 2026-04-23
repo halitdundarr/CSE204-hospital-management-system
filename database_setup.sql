@@ -40,8 +40,8 @@ CREATE TABLE `Admin` (
 --
 
 INSERT INTO `Admin` (`Admin_ID`, `Admin_First_Name`, `Admin_Last_Name`, `Admin_Email`, `Admin_Password`) VALUES
-(1, 'admin', 'admin', 'admin@email.com', 'admin123'),
-(2, 'system', 'admin', 'systemadmin@email.com', 'system123');
+(1, 'admin', 'admin', 'admin@email.com', '$2y$10$qrr/tWLjpPrzwFJBC2aZQOlpHQEd5eDfYWBVUdlsWIDRCsnrnYAWC'),
+(2, 'system', 'admin', 'systemadmin@email.com', '$2y$10$KJhLkUc0yaNdGVxkuFL1Q.Jh6iKJQYp/ONm7/dR0nKQ6IKVvoRL1u');
 
 -- --------------------------------------------------------
 
@@ -250,12 +250,12 @@ CREATE TABLE `Doctor` (
 --
 
 INSERT INTO `Doctor` (`Doctor_ID`, `Doctor_First_Name`, `Doctor_Last_Name`, `Doctor_Gender`, `Doctor_Email`, `Doctor_Phone`, `Clinic_ID`, `Doctor_Password`, `Admin_ID`) VALUES
-(1, 'Halit', 'Dündar', 'Male', 'halit@email.com', NULL, 1, 'halit123', 1),
-(2, 'Seyhan', 'Günay', 'Male', 'seyhan@email.com', NULL, 2, 'seyhan123', 2),
-(3, 'Tolunay', 'Tunca', 'Male', 'tolunay@email.com', NULL, 3, 'tolunay123', 1),
-(4, 'Yusuf', 'Fidan', 'Male', 'yusuf@email.com', NULL, 4, 'yusuf123', 2),
-(5, 'Anıl', 'Yeşil', 'Male', 'anıl@email.com', NULL, 5, 'anıl123', 2),
-(6, 'Yiğit', 'Ertaş', 'Male', 'yigit@email.com', NULL, 3, 'yigit123', 1);
+(1, 'Halit', 'Dündar', 'Male', 'halit@email.com', NULL, 1, '$2y$10$V.agDknTZDvYQvt9oGWHfufFZhCKI2bfQ9xH1./BF89enk4vIBjSi', 1),
+(2, 'Seyhan', 'Günay', 'Male', 'seyhan@email.com', NULL, 2, '$2y$10$sNqeFnEd1ZfXyuptiduJ9uM6asIzGl6Fa1lmyn5EIY3qQDJMvsOKe', 2),
+(3, 'Tolunay', 'Tunca', 'Male', 'tolunay@email.com', NULL, 3, '$2y$10$Xni5OrrFJgj/uULW5KBNXOMCBwHZhmWvFi4Q1mInpbyY2TmtXJNZy', 1),
+(4, 'Yusuf', 'Fidan', 'Male', 'yusuf@email.com', NULL, 4, '$2y$10$ZLU8IcTqnG0hUi.Zrnt4Gu0821It.BTqQi4a3FUaCwdXy9wz8B6FS', 2),
+(5, 'Anıl', 'Yeşil', 'Male', 'anıl@email.com', NULL, 5, '$2y$10$GqhuCnuhJgKF1nV6ByyqMe.ryYrM814wxfJ8NhA4EJ3s98/d/KqcO', 2),
+(6, 'Yiğit', 'Ertaş', 'Male', 'yigit@email.com', NULL, 3, '$2y$10$Uc56e9GhEZfpriA/OMj5DunYBT5QgE6CxleI5zECTgQuO/borB8wC', 1);
 
 -- --------------------------------------------------------
 
@@ -425,12 +425,12 @@ CREATE TABLE `Patient` (
 --
 
 INSERT INTO `Patient` (`Patient_ID`, `Patient_First_Name`, `Patient_Last_Name`, `Patient_Gender`, `Patient_DOB`, `Patient_Blood_Type`, `Patient_Phone`, `Patient_Address`, `Patient_Password`) VALUES
-(21721721795, 'Mehmet', 'Baş', 'Male', '1976-08-15', '0 -', '5355112233', 'Kepez', 'mehmet123'),
-(23423423477, 'Melike', 'Özal', 'Female', '1985-03-10', 'A +', '5451234563', 'Konyaaltı', 'melike123'),
-(43543543565, 'Murat', 'Yüce', 'Male', '1990-01-01', 'A -', '5551234569', 'Muratpaşa', 'murat123'),
-(56756756734, 'Dilara', 'Tekin', 'Female', '1999-12-25', 'B +', '5355643322', 'Kepez', 'dilara123'),
-(65656565923, 'Betül', 'Yekin', 'Female', '1994-05-12', 'AB -', '5466454321', 'Muratpaşa', 'betül123'),
-(67867867823, 'Kerim', 'Küçük', 'Male', '2004-12-25', 'A -', '5312458414', 'Aksu', 'kerim123');
+(21721721795, 'Mehmet', 'Baş', 'Male', '1976-08-15', '0 -', '5355112233', 'Kepez', '$2y$10$GlfGFV/xovPi81BKYatJGev5HUNRQI2Pxs7thxPj8GIKmJNtmwSiW'),
+(23423423477, 'Melike', 'Özal', 'Female', '1985-03-10', 'A +', '5451234563', 'Konyaaltı', '$2y$10$yhkfV.cs8MhqvWTd5aIHGOnAPaUMMZEI34top26gyKkz3LW5.9rb2'),
+(43543543565, 'Murat', 'Yüce', 'Male', '1990-01-01', 'A -', '5551234569', 'Muratpaşa', '$2y$10$acUiC6zi9R.VLODq2Uf/k.MXn4vNJaKg/7IjvDnPWHugdUcZdPFGO'),
+(56756756734, 'Dilara', 'Tekin', 'Female', '1999-12-25', 'B +', '5355643322', 'Kepez', '$2y$10$g18FHewWtUoGAANbbSSPWeN.p/dp/RgIAwmryz3GyafgsE.cEXEza'),
+(65656565923, 'Betül', 'Yekin', 'Female', '1994-05-12', 'AB -', '5466454321', 'Muratpaşa', '$2y$10$XuDfD11o8vEffiPilatnOeFVIiWxZY31XVkySkBliWzkdnFucyB0W'),
+(67867867823, 'Kerim', 'Küçük', 'Male', '2004-12-25', 'A -', '5312458414', 'Aksu', '$2y$10$9yt6DBdkELxK2HLPoIUdzuEavq5uLRdEzqFFmpGGjWhfgX0pACNIa');
 
 -- --------------------------------------------------------
 

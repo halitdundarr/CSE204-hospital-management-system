@@ -11,7 +11,8 @@ $dbname = env_value('DB_NAME', 'Hospital_3NF');
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
-    die("Failed to connect to DB: " . $conn->connect_error);
+    error_log("DB connect error: " . $conn->connect_error);
+    die("A database error occurred. Please try again later.");
 }
 
 if (!$conn->set_charset("utf8")) {
