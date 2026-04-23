@@ -29,7 +29,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $delete_stmt = $conn->prepare($delete_sql);
     if ($delete_stmt) {
         $delete_stmt->bind_param("i", $assignment_id);
-        if ($delete_stmt->execute() && $delete_stmt->affected_rows > 0) {
+        if (!$delete_stmt->execute()) {
+            $_SESSION['admin_support_staff_feedback'] = "Database error while removing assignment: " . $delete_stmt->error;
+            $_SESSION['admin_support_staff_feedback_type'] = "error";
+        } elseif ($delete_stmt->affected_rows > 0) {
             audit_log_action(
                 $conn,
                 'admin',
@@ -42,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION['admin_support_staff_feedback'] = "Support staff assignment removed.";
             $_SESSION['admin_support_staff_feedback_type'] = "success";
         } else {
-            $_SESSION['admin_support_staff_feedback'] = "Assignment not found or could not be removed.";
+            $_SESSION['admin_support_staff_feedback'] = "Assignment not found or already removed.";
             $_SESSION['admin_support_staff_feedback_type'] = "error";
         }
         $delete_stmt->close();

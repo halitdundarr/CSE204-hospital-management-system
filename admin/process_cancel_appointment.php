@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 // Check login and role
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -11,6 +12,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 
 // Check POST data
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id_to_cancel'])) {
+
+    if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['admin_manage_appointment_feedback'] = "Invalid form token. Please try again.";
+        $_SESSION['admin_manage_appointment_feedback_type'] = "error";
+        header("Location: manage_appointments.php");
+        exit;
+    }
 
     $appointment_id = filter_var($_POST['appointment_id_to_cancel'], FILTER_VALIDATE_INT);
     $cancelled_status = 'Cancelled';
@@ -31,6 +39,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['appointment_id_to_canc
         $stmt->bind_param("sis", $cancelled_status, $appointment_id, $required_status);
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
+                audit_log_action(
+                    $conn,
+                    'admin',
+                    (int)$_SESSION['user_id'],
+                    'ADMIN_CANCEL_APPOINTMENT',
+                    'APPOINTMENT',
+                    $appointment_id,
+                    ['new_status' => $cancelled_status]
+                );
                 $_SESSION['admin_manage_appointment_feedback'] = "Appointment ID: $appointment_id cancelled successfully.";
                 $_SESSION['admin_manage_appointment_feedback_type'] = "success";
             } else {
