@@ -12,40 +12,76 @@ $appointments = [];
 $secretaries = [];
 $translators = [];
 $existing_assignments = [];
+$admin_id = (int)$_SESSION['user_id'];
 
-$appt_result = $conn->query("SELECT `Appointment_ID`, `Appointment_Date`, `Appointment_Time`, `Patient_ID` FROM `Appointment` ORDER BY `Appointment_Date` DESC, `Appointment_Time` DESC");
-if ($appt_result) {
+$appt_sql = "SELECT a.`Appointment_ID`, a.`Appointment_Date`, a.`Appointment_Time`, a.`Patient_ID`, d.`Clinic_ID`
+             FROM `Appointment` a
+             JOIN `Doctor` d ON a.`Doctor_ID` = d.`Doctor_ID`
+             JOIN `Clinic` c ON d.`Clinic_ID` = c.`Clinic_ID`
+             WHERE c.`Admin_ID` = ?
+             ORDER BY a.`Appointment_Date` DESC, a.`Appointment_Time` DESC";
+$appt_stmt = $conn->prepare($appt_sql);
+if ($appt_stmt) {
+    $appt_stmt->bind_param("i", $admin_id);
+    $appt_stmt->execute();
+    $appt_result = $appt_stmt->get_result();
     while ($row = $appt_result->fetch_assoc()) {
         $appointments[] = $row;
     }
+    $appt_stmt->close();
 }
 
-$sec_result = $conn->query("SELECT `Secretary_ID`, `Secretary_First_Name`, `Secretary_Last_Name` FROM `Secretary` ORDER BY `Secretary_First_Name`, `Secretary_Last_Name`");
-if ($sec_result) {
+$sec_sql = "SELECT `Secretary_ID`, `Secretary_First_Name`, `Secretary_Last_Name`, `Clinic_ID`
+            FROM `Secretary`
+            WHERE `Admin_ID` = ?
+            ORDER BY `Secretary_First_Name`, `Secretary_Last_Name`";
+$sec_stmt = $conn->prepare($sec_sql);
+if ($sec_stmt) {
+    $sec_stmt->bind_param("i", $admin_id);
+    $sec_stmt->execute();
+    $sec_result = $sec_stmt->get_result();
     while ($row = $sec_result->fetch_assoc()) {
         $secretaries[] = $row;
     }
+    $sec_stmt->close();
 }
 
-$tr_result = $conn->query("SELECT `Translator_ID`, `Translator_First_Name`, `Translator_Last_Name`, `Language` FROM `Translator` ORDER BY `Translator_First_Name`, `Translator_Last_Name`");
-if ($tr_result) {
+$tr_sql = "SELECT `Translator_ID`, `Translator_First_Name`, `Translator_Last_Name`, `Language`, `Clinic_ID`
+           FROM `Translator`
+           WHERE `Admin_ID` = ?
+           ORDER BY `Translator_First_Name`, `Translator_Last_Name`";
+$tr_stmt = $conn->prepare($tr_sql);
+if ($tr_stmt) {
+    $tr_stmt->bind_param("i", $admin_id);
+    $tr_stmt->execute();
+    $tr_result = $tr_stmt->get_result();
     while ($row = $tr_result->fetch_assoc()) {
         $translators[] = $row;
     }
+    $tr_stmt->close();
 }
 
 $assign_sql = "SELECT ass.`Assignment_ID`, ass.`Appointment_ID`, ass.`Staff_Type`, ass.`Staff_ID`, ass.`Notes`, ass.`Assigned_At`,
-    s.`Secretary_First_Name`, s.`Secretary_Last_Name`,
-    t.`Translator_First_Name`, t.`Translator_Last_Name`, t.`Language`
+    s.`Secretary_First_Name`, s.`Secretary_Last_Name`, s.`Clinic_ID` AS `Secretary_Clinic_ID`,
+    t.`Translator_First_Name`, t.`Translator_Last_Name`, t.`Language`, t.`Clinic_ID` AS `Translator_Clinic_ID`,
+    d.`Clinic_ID` AS `Appointment_Clinic_ID`
     FROM `Appointment_Support_Staff` ass
+    JOIN `Appointment` a ON ass.`Appointment_ID` = a.`Appointment_ID`
+    JOIN `Doctor` d ON a.`Doctor_ID` = d.`Doctor_ID`
+    JOIN `Clinic` c ON d.`Clinic_ID` = c.`Clinic_ID`
     LEFT JOIN `Secretary` s ON ass.`Staff_Type` = 'Secretary' AND ass.`Staff_ID` = s.`Secretary_ID`
     LEFT JOIN `Translator` t ON ass.`Staff_Type` = 'Translator' AND ass.`Staff_ID` = t.`Translator_ID`
+    WHERE c.`Admin_ID` = ?
     ORDER BY ass.`Assigned_At` DESC";
-$assign_result = $conn->query($assign_sql);
-if ($assign_result) {
+$assign_stmt = $conn->prepare($assign_sql);
+if ($assign_stmt) {
+    $assign_stmt->bind_param("i", $admin_id);
+    $assign_stmt->execute();
+    $assign_result = $assign_stmt->get_result();
     while ($row = $assign_result->fetch_assoc()) {
         $existing_assignments[] = $row;
     }
+    $assign_stmt->close();
 }
 
 $feedback_message = $_SESSION['admin_support_staff_feedback'] ?? null;
@@ -149,14 +185,21 @@ $conn->close();
                     <tbody>
                         <?php foreach ($existing_assignments as $assignment): ?>
                             <?php
+                            $clinic_mismatch = false;
                             if ($assignment['Staff_Type'] === 'Secretary') {
                                 $staff_name = trim(($assignment['Secretary_First_Name'] ?? '') . ' ' . ($assignment['Secretary_Last_Name'] ?? ''));
+                                $clinic_mismatch = isset($assignment['Secretary_Clinic_ID'], $assignment['Appointment_Clinic_ID']) &&
+                                    (int)$assignment['Secretary_Clinic_ID'] !== (int)$assignment['Appointment_Clinic_ID'];
                             } else {
                                 $name_part = trim(($assignment['Translator_First_Name'] ?? '') . ' ' . ($assignment['Translator_Last_Name'] ?? ''));
                                 $staff_name = $name_part !== '' ? $name_part . ' (' . ($assignment['Language'] ?? 'N/A') . ')' : '';
+                                $clinic_mismatch = isset($assignment['Translator_Clinic_ID'], $assignment['Appointment_Clinic_ID']) &&
+                                    (int)$assignment['Translator_Clinic_ID'] !== (int)$assignment['Appointment_Clinic_ID'];
                             }
                             if ($staff_name === '') {
                                 $staff_name = 'Deleted or missing staff record';
+                            } elseif ($clinic_mismatch) {
+                                $staff_name .= ' [Clinic mismatch]';
                             }
                             ?>
                             <tr>
@@ -182,14 +225,23 @@ $conn->close();
     <script>
         const secretaries = <?php echo json_encode($secretaries, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
         const translators = <?php echo json_encode($translators, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+        const appointments = <?php echo json_encode($appointments, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+        const appointmentSelect = document.getElementById('appointment_id');
         const staffType = document.getElementById('staff_type');
         const staffSelect = document.getElementById('staff_id');
 
         function refreshStaffOptions() {
             const type = staffType.value;
+            const selectedAppointmentId = parseInt(appointmentSelect.value, 10);
+            const selectedAppointment = appointments.find((row) => parseInt(row.Appointment_ID, 10) === selectedAppointmentId);
+            const targetClinicId = selectedAppointment ? parseInt(selectedAppointment.Clinic_ID, 10) : null;
             staffSelect.innerHTML = '<option value="" selected disabled>-- Select Staff --</option>';
             const data = type === 'Secretary' ? secretaries : translators;
             data.forEach((row) => {
+                const staffClinicId = parseInt(row.Clinic_ID, 10);
+                if (targetClinicId !== null && staffClinicId !== targetClinicId) {
+                    return;
+                }
                 const option = document.createElement('option');
                 const id = type === 'Secretary' ? row.Secretary_ID : row.Translator_ID;
                 const first = type === 'Secretary' ? row.Secretary_First_Name : row.Translator_First_Name;
@@ -202,6 +254,7 @@ $conn->close();
         }
 
         staffType.addEventListener('change', refreshStaffOptions);
+        appointmentSelect.addEventListener('change', refreshStaffOptions);
     </script>
 </body>
 </html>

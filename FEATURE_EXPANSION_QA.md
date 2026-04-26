@@ -13,6 +13,7 @@
   - `admin/add_secretary.php`, `admin/process_add_secretary.php`
   - `admin/add_translator.php`, `admin/process_add_translator.php`
   - `admin/manage_support_staff.php`, `admin/process_assign_support_staff.php`
+  - Constraint: `Translator.Clinic_ID` is required and translator assignments must match appointment clinic.
 - UI requests:
   1. Doctors seen by patient: `admin/find_patient_doctors.php` (kept and integrated with new admin menu)
   2. Patients + appointment count in past year: `admin/view_all_patients_appointments.php`
@@ -24,8 +25,10 @@
 
 - Admin:
   - Open `admin/view_bills.php`, verify new payment columns are visible.
-  - Create secretary and translator records from new pages.
-  - Assign support staff to an appointment from `admin/manage_support_staff.php`.
+  - Create secretary and translator records from new pages (translator requires clinic selection).
+  - Assign support staff to an appointment from `admin/manage_support_staff.php` and verify:
+    - same-clinic translator assignment succeeds,
+    - cross-clinic translator assignment is blocked.
   - Open `admin/view_all_patients_appointments.php` and verify appointment count appears per patient.
   - Edit an appointment date/time and confirm success feedback.
   - Delete an appointment and verify clear error when constrained.
@@ -60,6 +63,8 @@
   - Medication is represented in `Medical_Treatment` (`Treatment_Type='Medication'`).
   - Legacy `Appointment_Medicine` table is removed.
   - New minimum-scope staff tables exist (`Secretary`, `Translator`, `Appointment_Support_Staff`).
+  - `Translator.Clinic_ID` exists, is non-nullable, indexed, and has FK to `Clinic`.
+  - Translator support assignments align with appointment clinic.
   - Seed data includes at least one paid bill with payment method.
   - Last-year appointment count query structure works across patient set.
 
@@ -81,3 +86,10 @@
 
 - `php -l` runtime syntax checks could not be executed in this environment because `php` binary is unavailable.
 - IDE lint diagnostics returned no issues on edited files.
+
+## Assignment Item 3 Wording (Report Insert)
+
+- Suggested rationale sentence:
+  - "3NF'e tasinan tekrar eden ve tureyen nitelikler, tablo sismesini ve tutarsizlik riskini azaltmak icin `ALTER TABLE ... DROP COLUMN` komutlari ile `Hospital_UNF` staging tablosundan kaldirildi."
+- Suggested validation sentence:
+  - "UNF tablosunda dusurulen kolonlar sonrasinda, 3NF tablolari JOIN edilerek olusturulan gorunum (recreated dataset view) ile orijinal veri yapisinin yeniden elde edilebildigi dogrulandi."

@@ -22,6 +22,13 @@ if (isset($_SESSION['cancellation_success'])) {
 } elseif (isset($_SESSION['cancellation_error'])) {
     $feedback_message = $_SESSION['cancellation_error'];
     unset($_SESSION['cancellation_error']);
+} elseif (isset($_SESSION['deletion_success'])) {
+    $feedback_message = $_SESSION['deletion_success'];
+    $feedback_type = 'success';
+    unset($_SESSION['deletion_success']);
+} elseif (isset($_SESSION['deletion_error'])) {
+    $feedback_message = $_SESSION['deletion_error'];
+    unset($_SESSION['deletion_error']);
 } elseif (isset($_SESSION['patient_edit_appointment_feedback'])) { // Check for edit feedback
     $feedback_message = $_SESSION['patient_edit_appointment_feedback'];
     $feedback_type = isset($_SESSION['patient_edit_appointment_feedback_type']) ? $_SESSION['patient_edit_appointment_feedback_type'] : 'error';
@@ -78,6 +85,8 @@ $conn->close();
         .action-button.cancel:hover { background-color: #c82333; }
         .action-button.followup { background-color: #17a2b8; } /* Teal */
         .action-button.followup:hover { background-color: #138496; }
+        .action-button.delete { background-color: #6f42c1; } /* Purple */
+        .action-button.delete:hover { background-color: #5a32a3; }
         /* Feedback Message Styles */
         .message { padding: 10px 15px; margin-bottom: 15px; border-radius: 4px; font-size: 0.95em;}
         .success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb;}
@@ -94,6 +103,7 @@ $conn->close();
             <li><a href="view_diagnoses.php">View Diagnoses</a></li>
             <li><a href="view_tests.php">View Tests & Results</a></li>
             <li><a href="view_bills.php">View Bills</a></li>
+            <li><a href="view_support_staff.php">View Support Staff</a></li>
         </ul>
         <div class="logout-link">
              <a href="../logout.php">Logout</a>
@@ -137,6 +147,7 @@ $conn->close();
                             $status = $appt['Status'] ?? 'Unknown';
                             $is_future_scheduled = (strtotime($appt['Appointment_Date']) >= strtotime(date('Y-m-d'))) && $status === 'Scheduled';
                             $is_past_or_completed = (strtotime($appt['Appointment_Date']) < strtotime(date('Y-m-d'))) || $status === 'Completed';
+                            $can_delete_permanently = (strtotime($appt['Appointment_Date']) >= strtotime(date('Y-m-d'))) && in_array($status, ['Scheduled', 'Cancelled'], true);
                             ?>
                             <tr>
                                 <td><?php echo htmlspecialchars(date("d-m-Y", strtotime($appt['Appointment_Date']))); ?></td>
@@ -164,7 +175,15 @@ $conn->close();
                                            class="action-button followup">Book Follow-up</a>
                                     <?php endif; ?>
 
-                                    <?php if (!$is_future_scheduled && !($is_past_or_completed && $status !== 'Cancelled')): // Diğer durumlar ?>
+                                    <?php if ($can_delete_permanently): ?>
+                                        <form action="process_delete_appointment.php" method="POST" style="display:inline;" onsubmit="return confirm('This will permanently delete the appointment and all linked records. This action cannot be undone. Continue?');">
+                                            <?php echo csrf_input_field(); ?>
+                                            <input type="hidden" name="appointment_id_to_delete" value="<?php echo $appt['Appointment_ID']; ?>">
+                                            <button type="submit" class="action-button delete">Delete Permanently</button>
+                                        </form>
+                                    <?php endif; ?>
+
+                                    <?php if (!$is_future_scheduled && !($is_past_or_completed && $status !== 'Cancelled') && !$can_delete_permanently): // Other states ?>
                                         -
                                      <?php endif; ?>
                                 </td>

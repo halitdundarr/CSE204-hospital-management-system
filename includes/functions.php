@@ -81,4 +81,26 @@ function audit_log_action($conn, $actor_role, $actor_id, $action_type, $target_t
 	return $ok;
 }
 
+function mark_appointment_completed_by_doctor($conn, $appointment_id, $doctor_id) {
+	$appointment_id = (int)$appointment_id;
+	$doctor_id = (int)$doctor_id;
+	if ($appointment_id <= 0 || $doctor_id <= 0) {
+		return false;
+	}
+
+	$sql = "UPDATE `APPOINTMENT`
+		SET `Status` = 'Completed'
+		WHERE `Appointment_ID` = ?
+		  AND `Doctor_ID` = ?
+		  AND `Status` <> 'Cancelled'";
+	$stmt = $conn->prepare($sql);
+	if (!$stmt) {
+		return false;
+	}
+	$stmt->bind_param("ii", $appointment_id, $doctor_id);
+	$ok = $stmt->execute();
+	$stmt->close();
+	return $ok;
+}
+
 ?>

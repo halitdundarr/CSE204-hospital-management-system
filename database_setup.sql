@@ -377,6 +377,7 @@ CREATE TABLE `Translator` (
   `Translator_Email` varchar(255) NOT NULL,
   `Translator_Phone` varchar(20) DEFAULT NULL,
   `Language` varchar(100) NOT NULL,
+  `Clinic_ID` int(11) NOT NULL,
   `Admin_ID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -384,8 +385,8 @@ CREATE TABLE `Translator` (
 -- Dumping data for table `Translator`
 --
 
-INSERT INTO `Translator` (`Translator_ID`, `Translator_First_Name`, `Translator_Last_Name`, `Translator_Email`, `Translator_Phone`, `Language`, `Admin_ID`) VALUES
-(1, 'Mehmet', 'Yildiz', 'mehmet.translator@email.com', '5551000002', 'English', 1);
+INSERT INTO `Translator` (`Translator_ID`, `Translator_First_Name`, `Translator_Last_Name`, `Translator_Email`, `Translator_Phone`, `Language`, `Clinic_ID`, `Admin_ID`) VALUES
+(1, 'Mehmet', 'Yildiz', 'mehmet.translator@email.com', '5551000002', 'English', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -583,6 +584,7 @@ ALTER TABLE `Secretary`
 ALTER TABLE `Translator`
   ADD PRIMARY KEY (`Translator_ID`),
   ADD UNIQUE KEY `Translator_Email` (`Translator_Email`),
+  ADD KEY `Clinic_ID` (`Clinic_ID`),
   ADD KEY `Admin_ID` (`Admin_ID`);
 
 --
@@ -745,7 +747,8 @@ ALTER TABLE `Secretary`
 -- Constraints for table `Translator`
 --
 ALTER TABLE `Translator`
-  ADD CONSTRAINT `translator_ibfk_1` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`);
+  ADD CONSTRAINT `translator_ibfk_1` FOREIGN KEY (`Admin_ID`) REFERENCES `Admin` (`Admin_ID`),
+  ADD CONSTRAINT `translator_ibfk_2` FOREIGN KEY (`Clinic_ID`) REFERENCES `Clinic` (`Clinic_ID`);
 
 --
 -- Constraints for table `Appointment_Support_Staff`
@@ -757,6 +760,27 @@ ALTER TABLE `Appointment_Support_Staff`
 --
 ALTER TABLE `Bill`
   ADD CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`Appointment_ID`) REFERENCES `Appointment` (`Appointment_ID`) ON DELETE CASCADE;
+
+-- --------------------------------------------------------
+-- CSE204 Assignment Item 3: UNF -> 3NF cleanup template
+-- --------------------------------------------------------
+-- The production schema in this file is already 3NF. The following block documents
+-- the expected coursework sequence after UNF-to-3NF data migration:
+--   1) Create Hospital_UNF (staging table)
+--   2) Create 3NF tables
+--   3) Populate 3NF tables with INSERT ... SELECT DISTINCT
+--   4) Drop redundant descriptive columns from Hospital_UNF
+--
+-- Example normalization cleanup step:
+-- ALTER TABLE Hospital_UNF
+--   DROP COLUMN Diagnosis_Name,
+--   DROP COLUMN Test_Name,
+--   DROP COLUMN Test_Result,
+--   DROP COLUMN Medical_Treatment,
+--   DROP COLUMN Medicine_Name,
+--   DROP COLUMN Dosage,
+--   DROP COLUMN Bill_Status;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

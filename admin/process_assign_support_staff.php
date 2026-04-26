@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header("Location: ../index.php");
     exit;
 }
+$admin_id = (int)$_SESSION['user_id'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!is_valid_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -30,28 +31,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($staff_id === false || $staff_id <= 0) $errors[] = "Invalid staff member.";
     if (!in_array($staff_type, ['Secretary', 'Translator'], true)) $errors[] = "Invalid staff type.";
 
+    $appointment_clinic_id = null;
     if (empty($errors)) {
-        $check_appointment = $conn->prepare("SELECT `Appointment_ID` FROM `Appointment` WHERE `Appointment_ID` = ?");
+        $check_appointment = $conn->prepare(
+            "SELECT a.`Appointment_ID`, d.`Clinic_ID`
+             FROM `Appointment` a
+             JOIN `Doctor` d ON a.`Doctor_ID` = d.`Doctor_ID`
+             JOIN `Clinic` c ON d.`Clinic_ID` = c.`Clinic_ID`
+             WHERE a.`Appointment_ID` = ? AND c.`Admin_ID` = ?"
+        );
         if ($check_appointment) {
-            $check_appointment->bind_param("i", $appointment_id);
+            $check_appointment->bind_param("ii", $appointment_id, $admin_id);
             $check_appointment->execute();
-            $appt_exists = $check_appointment->get_result()->num_rows === 1;
+            $appt_row = $check_appointment->get_result()->fetch_assoc();
             $check_appointment->close();
-            if (!$appt_exists) $errors[] = "Appointment does not exist.";
+            if (!$appt_row) {
+                $errors[] = "Appointment does not exist or is out of your clinic scope.";
+            } else {
+                $appointment_clinic_id = (int)$appt_row['Clinic_ID'];
+            }
         }
     }
 
     if (empty($errors)) {
-        $staff_table = $staff_type === 'Secretary' ? 'Secretary' : 'Translator';
-        $staff_pk = $staff_type === 'Secretary' ? 'Secretary_ID' : 'Translator_ID';
-        $staff_check_sql = "SELECT `$staff_pk` FROM `$staff_table` WHERE `$staff_pk` = ?";
+        if ($staff_type === 'Secretary') {
+            $staff_check_sql = "SELECT `Secretary_ID` FROM `Secretary` WHERE `Secretary_ID` = ? AND `Admin_ID` = ? AND `Clinic_ID` = ?";
+        } else {
+            $staff_check_sql = "SELECT `Translator_ID` FROM `Translator` WHERE `Translator_ID` = ? AND `Admin_ID` = ? AND `Clinic_ID` = ?";
+        }
         $staff_check_stmt = $conn->prepare($staff_check_sql);
         if ($staff_check_stmt) {
-            $staff_check_stmt->bind_param("i", $staff_id);
+            $staff_check_stmt->bind_param("iii", $staff_id, $admin_id, $appointment_clinic_id);
             $staff_check_stmt->execute();
             $exists = $staff_check_stmt->get_result()->num_rows === 1;
             $staff_check_stmt->close();
-            if (!$exists) $errors[] = "Selected staff record does not exist.";
+            if (!$exists) $errors[] = "Selected staff record is invalid for this appointment clinic.";
         }
     }
 

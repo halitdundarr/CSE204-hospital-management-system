@@ -7,6 +7,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     exit;
 }
 
+$admin_id = (int)$_SESSION['user_id'];
+$clinics = [];
+$clinic_stmt = $conn->prepare("SELECT `Clinic_ID`, `Clinic_Name` FROM `Clinic` WHERE `Admin_ID` = ? ORDER BY `Clinic_Name`");
+if ($clinic_stmt) {
+    $clinic_stmt->bind_param("i", $admin_id);
+    $clinic_stmt->execute();
+    $clinic_result = $clinic_stmt->get_result();
+    while ($row = $clinic_result->fetch_assoc()) {
+        $clinics[] = $row;
+    }
+    $clinic_stmt->close();
+}
+$conn->close();
+
 $feedback_message = $_SESSION['admin_feedback'] ?? null;
 $feedback_type = $_SESSION['admin_feedback_type'] ?? 'error';
 unset($_SESSION['admin_feedback'], $_SESSION['admin_feedback_type']);
@@ -60,6 +74,15 @@ unset($_SESSION['admin_feedback'], $_SESSION['admin_feedback_type']);
                 <input type="text" id="phone" name="phone" required>
                 <label for="language">Language</label>
                 <input type="text" id="language" name="language" placeholder="e.g. English, German, Arabic" required>
+                <label for="clinic_id">Clinic</label>
+                <select id="clinic_id" name="clinic_id" required>
+                    <option value="" disabled selected>-- Select Clinic --</option>
+                    <?php foreach ($clinics as $clinic): ?>
+                        <option value="<?php echo (int)$clinic['Clinic_ID']; ?>">
+                            <?php echo htmlspecialchars($clinic['Clinic_Name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
                 <button type="submit">Add Translator</button>
             </form>
         </div>

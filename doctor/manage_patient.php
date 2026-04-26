@@ -188,6 +188,10 @@ $conn->close();
         .error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb;}
         .prescription-medicine-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;}
         .prescription-medicine-item span { flex-grow: 1; margin-right: 10px;}
+        .finish-section { margin-top: 30px; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
+        .finish-section h3 { margin-top: 0; color: #856404; }
+        .finish-button { background-color: #fd7e14; color: #fff; border: none; border-radius: 4px; padding: 10px 14px; cursor: pointer; font-size: 0.95em; }
+        .finish-button:hover { background-color: #e96b00; }
     </style>
 </head>
 <body>
@@ -450,6 +454,23 @@ $conn->close();
                              <button type="submit">Add Medicine</button>
                          </form>
                      </div>
+                 </div>
+
+                 <div id="finish-appointment" class="finish-section">
+                     <h3>Finalize Appointment</h3>
+                     <p>After adding required records, click finish to mark this appointment as completed.</p>
+                     <?php if (($appointment_details['Status'] ?? '') === 'Completed'): ?>
+                         <p><strong>This appointment is already completed.</strong></p>
+                     <?php elseif (($appointment_details['Status'] ?? '') === 'Cancelled'): ?>
+                         <p><strong>Cancelled appointments cannot be finalized.</strong></p>
+                     <?php else: ?>
+                         <form action="process_finish_appointment.php" method="POST" onsubmit="return confirm('Finish this appointment? You can still view records later.');">
+                             <?php echo csrf_input_field(); ?>
+                             <input type="hidden" name="appointment_id" value="<?php echo $appointment_id; ?>">
+                             <input type="hidden" name="patient_id" value="<?php echo $patient_id; ?>">
+                             <button type="submit" class="finish-button">Finish / Evaluate Appointment</button>
+                         </form>
+                     <?php endif; ?>
                  </div>
 
             <?php else: ?>

@@ -24,6 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
     $phone = trim($_POST['phone'] ?? '');
     $language = trim($_POST['language'] ?? '');
+    $clinic_id = filter_var($_POST['clinic_id'] ?? null, FILTER_VALIDATE_INT);
 
     $errors = [];
     if ($first_name === '') $errors[] = "First name is required.";
@@ -31,6 +32,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "A valid email is required.";
     if ($phone === '') $errors[] = "Phone is required.";
     if ($language === '') $errors[] = "Language is required.";
+    if ($clinic_id === false || $clinic_id <= 0) $errors[] = "Please select a valid clinic.";
+
+    if (empty($errors)) {
+        $clinic_check_sql = "SELECT `Clinic_ID` FROM `Clinic` WHERE `Clinic_ID` = ? AND `Admin_ID` = ?";
+        $clinic_check_stmt = $conn->prepare($clinic_check_sql);
+        if ($clinic_check_stmt) {
+            $clinic_check_stmt->bind_param("ii", $clinic_id, $admin_id);
+            $clinic_check_stmt->execute();
+            if ($clinic_check_stmt->get_result()->num_rows !== 1) {
+                $errors[] = "Selected clinic is not available for your admin account.";
+            }
+            $clinic_check_stmt->close();
+        }
+    }
 
     $dup_sql = "SELECT `Translator_ID` FROM `Translator` WHERE `Translator_Email` = ?";
     $dup_stmt = $conn->prepare($dup_sql);
@@ -52,11 +67,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     $insert_sql = "INSERT INTO `Translator`
-        (`Translator_First_Name`, `Translator_Last_Name`, `Translator_Email`, `Translator_Phone`, `Language`, `Admin_ID`)
-        VALUES (?, ?, ?, ?, ?, ?)";
+        (`Translator_First_Name`, `Translator_Last_Name`, `Translator_Email`, `Translator_Phone`, `Language`, `Clinic_ID`, `Admin_ID`)
+        VALUES (?, ?, ?, ?, ?, ?, ?)";
     $insert_stmt = $conn->prepare($insert_sql);
     if ($insert_stmt) {
-        $insert_stmt->bind_param("sssssi", $first_name, $last_name, $email, $phone, $language, $admin_id);
+        $insert_stmt->bind_param("sssssii", $first_name, $last_name, $email, $phone, $language, $clinic_id, $admin_id);
         if ($insert_stmt->execute()) {
             $_SESSION['admin_feedback'] = "Translator added successfully.";
             $_SESSION['admin_feedback_type'] = "success";
