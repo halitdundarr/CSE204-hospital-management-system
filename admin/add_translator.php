@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../includes/db_connect.php';
 require_once '../includes/functions.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -7,17 +8,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     exit;
 }
 
-$admin_id = (int)$_SESSION['user_id'];
 $clinics = [];
-$clinic_stmt = $conn->prepare("SELECT `Clinic_ID`, `Clinic_Name` FROM `Clinic` WHERE `Admin_ID` = ? ORDER BY `Clinic_Name`");
-if ($clinic_stmt) {
-    $clinic_stmt->bind_param("i", $admin_id);
-    $clinic_stmt->execute();
-    $clinic_result = $clinic_stmt->get_result();
-    while ($row = $clinic_result->fetch_assoc()) {
+$sql_clinics = "SELECT `Clinic_ID`, `Clinic_Name` FROM `Clinic` ORDER BY `Clinic_Name`";
+$result_clinics = $conn->query($sql_clinics);
+if ($result_clinics) {
+    while ($row = $result_clinics->fetch_assoc()) {
         $clinics[] = $row;
     }
-    $clinic_stmt->close();
 }
 $conn->close();
 
